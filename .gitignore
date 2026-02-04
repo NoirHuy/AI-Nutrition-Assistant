@@ -1,0 +1,18 @@
+# Bỏ qua thư viện nặng
+node_modules/
+__pycache__/
+*.pyc
+
+# Bỏ qua biến môi trường & Key bí mật
+.env
+
+# Bỏ qua dữ liệu Database (Nặng & Thay đổi liên tục)
+neo4j_data/
+
+# Bỏ qua file build
+dist/
+build/
+
+# Bỏ qua file hệ thống
+.DS_Store
+Thumbs.db
