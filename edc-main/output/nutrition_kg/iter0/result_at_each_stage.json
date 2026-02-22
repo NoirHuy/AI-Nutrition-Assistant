@@ -1,0 +1,921 @@
+[
+    {
+        "index": 0,
+        "input_text": "Patients with type 2 diabetes mellitus should limit refined carbohydrates and increase dietary fiber intake. Whole grains, legumes, and non-starchy vegetables are recommended to improve glycemic control. Omega-3 fatty acids from fish oil may reduce insulin resistance in diabetic patients.\n",
+        "entity_hint": "",
+        "relation_hint": "",
+        "oie": [
+            [
+                "refined_carbohydrates",
+                "aggravates",
+                "type_2_diabetes"
+            ],
+            [
+                "dietary_fiber",
+                "recommended_for",
+                "type_2_diabetes"
+            ],
+            [
+                "whole_grains",
+                "recommended_for",
+                "type_2_diabetes"
+            ],
+            [
+                "legumes",
+                "recommended_for",
+                "type_2_diabetes"
+            ],
+            [
+                "non-starchy_vegetables",
+                "recommended_for",
+                "type_2_diabetes"
+            ],
+            [
+                "omega-3_fatty_acids",
+                "reduces",
+                "insulin_resistance"
+            ],
+            [
+                "fish_oil",
+                "source_of",
+                "omega-3_fatty_acids"
+            ]
+        ],
+        "schema_definition": {
+            "Here are the relation descriptions": "",
+            "recommended_for": "The subject entity (nutrient, food, or diet pattern) is specifically recommended for patients with the disease or condition specified by the object entity.",
+            "reduces": "The subject entity (nutrient or dietary component) lowers the level or severity of the biomarker or condition specified by the object entity.",
+            "source_of": "The subject entity (food, substance, or source) provides or contains the nutrient, compound, or component specified by the object entity.",
+            "aggravates": "The subject entity (food or substance) worsens the symptoms or progression of the disease or condition specified by the object entity."
+        },
+        "canonicalization_candidates": "[{}, {'recommended for': np.float64(0.9805934970464588), 'treats': np.float64(0.9388677294492547), 'prevents': np.float64(0.9170226872356964), 'contains': np.float64(0.9147396229730582), 'restricts': np.float64(0.9029250917116176)}, {'recommended for': np.float64(0.9805934970464588), 'treats': np.float64(0.9388677294492547), 'prevents': np.float64(0.9170226872356964), 'contains': np.float64(0.9147396229730582), 'restricts': np.float64(0.9029250917116176)}, {'recommended for': np.float64(0.9805934970464588), 'treats': np.float64(0.9388677294492547), 'prevents': np.float64(0.9170226872356964), 'contains': np.float64(0.9147396229730582), 'restricts': np.float64(0.9029250917116176)}, {'recommended for': np.float64(0.9805934970464588), 'treats': np.float64(0.9388677294492547), 'prevents': np.float64(0.9170226872356964), 'contains': np.float64(0.9147396229730582), 'restricts': np.float64(0.9029250917116176)}, {}, {'contains': np.float64(0.9622400594113647), 'food source': np.float64(0.9389080438084875), 'treats': np.float64(0.8897721353680019), 'prevents': np.float64(0.8613506192453032), 'daily intake': np.float64(0.8590062861950942)}]",
+        "schema_canonicalizaiton": [
+            [
+                "refined_carbohydrates",
+                "aggravates",
+                "type_2_diabetes"
+            ],
+            [
+                "dietary_fiber",
+                "treats",
+                "type_2_diabetes"
+            ],
+            [
+                "whole_grains",
+                "recommended for",
+                "type_2_diabetes"
+            ],
+            [
+                "legumes",
+                "recommended for",
+                "type_2_diabetes"
+            ],
+            [
+                "non-starchy_vegetables",
+                "recommended for",
+                "type_2_diabetes"
+            ],
+            [
+                "omega-3_fatty_acids",
+                "reduces",
+                "insulin_resistance"
+            ],
+            [
+                "fish_oil",
+                "contains",
+                "omega-3_fatty_acids"
+            ]
+        ]
+    },
+    {
+        "index": 1,
+        "input_text": "Vitamin D deficiency is commonly observed in patients with hypertension and cardiovascular disease. Calcium supplementation combined with vitamin D may help regulate blood pressure. Excessive sodium intake above 2300 mg per day increases the risk of hypertension.\n",
+        "entity_hint": "",
+        "relation_hint": "",
+        "oie": [
+            [
+                "vitamin_D",
+                "deficiency_causes",
+                "hypertension"
+            ],
+            [
+                "calcium_supplementation",
+                "treats",
+                "hypertension"
+            ],
+            [
+                "vitamin_D",
+                "required",
+                "blood_pressure_regulation"
+            ],
+            [
+                "sodium_intake",
+                "increases_risk_of",
+                "hypertension"
+            ],
+            [
+                "sodium_intake",
+                "daily_limit",
+                "2300_mg/day"
+            ]
+        ],
+        "schema_definition": {
+            "Here are the relation descriptions": "",
+            "deficiency_causes": "Insufficient intake or absorption of the subject entity (nutrient) causes or contributes to the disease or health condition specified by the object entity.",
+            "increases_risk_of": "The subject entity (food, nutrient, or substance) is correlated with a higher likelihood of developing the disease or condition specified by the object entity.",
+            "treats": "The subject entity (nutrient, supplement, or diet) is used therapeutically to manage or improve the disease or condition specified by the object entity.",
+            "required": "The subject entity (nutrient or substance) is necessary for the proper functioning or regulation of the physiological process specified by the object entity.",
+            "daily_limit": "The subject entity (nutrient or substance) has a recommended maximum daily intake amount described by the object entity."
+        },
+        "canonicalization_candidates": "[{'deficiency causes': np.float64(0.9382255770435137), 'requires': np.float64(0.8739003384164277), 'treats': np.float64(0.8624469108842903), 'restricts': np.float64(0.861251522828025), 'prevents': np.float64(0.8597179356488108)}, {}, {'contains': np.float64(0.8819488901658792), 'treats': np.float64(0.8739227317227709), 'deficiency causes': np.float64(0.8681758380732277), 'food source': np.float64(0.8552734159323581), 'prevents': np.float64(0.8489522494962994)}, {'associated with': np.float64(0.9438933800707455), 'aggravates': np.float64(0.9173670331441486), 'prevents': np.float64(0.89382556895196), 'deficiency causes': np.float64(0.8456134260470385), 'contains': np.float64(0.8406857525342661)}, {'daily intake': np.float64(0.9548232452478754), 'contains': np.float64(0.8654505990432948), 'recommended for': np.float64(0.8406754274057482), 'restricts': np.float64(0.8354102194932819), 'food source': np.float64(0.8313190993372754)}]",
+        "schema_canonicalizaiton": [
+            [
+                "vitamin_D",
+                "deficiency causes",
+                "hypertension"
+            ],
+            [
+                "calcium_supplementation",
+                "treats",
+                "hypertension"
+            ],
+            [
+                "vitamin_D",
+                "treats",
+                "blood_pressure_regulation"
+            ],
+            [
+                "sodium_intake",
+                "aggravates",
+                "hypertension"
+            ],
+            null
+        ]
+    },
+    {
+        "index": 2,
+        "input_text": "Chronic kidney disease patients must restrict protein intake to 0.6-0.8 grams per kilogram of body weight per day. Phosphorus-rich foods such as dairy products and processed meats should be limited in patients with chronic kidney disease. Potassium restriction is required for patients with chronic kidney disease stage 4 and 5.\n",
+        "entity_hint": "",
+        "relation_hint": "",
+        "oie": [
+            [
+                "chronic_kidney_disease",
+                "restricts",
+                "protein_intake"
+            ],
+            [
+                "protein_intake",
+                "daily_intake",
+                "0.6-0.8_g/kg/day"
+            ],
+            [
+                "chronic_kidney_disease",
+                "restricts",
+                "phosphorus_rich_foods"
+            ],
+            [
+                "dairy_products",
+                "aggravates",
+                "chronic_kidney_disease"
+            ],
+            [
+                "processed_meats",
+                "aggravates",
+                "chronic_kidney_disease"
+            ],
+            [
+                "chronic_kidney_disease_stage_4",
+                "requires",
+                "potassium_restriction"
+            ],
+            [
+                "chronic_kidney_disease_stage_5",
+                "requires",
+                "potassium_restriction"
+            ],
+            [
+                "chronic_kidney_disease",
+                "restricts",
+                "potassium_intake"
+            ]
+        ],
+        "schema_definition": {
+            "Here are the relation descriptions": "",
+            "aggravates": "The subject entity (food or substance) worsens the symptoms or progression of the disease or condition specified by the object entity.",
+            "daily_intake": "The subject entity (nutrient or dietary component) has a recommended or maximum daily intake amount described by the object entity.",
+            "restricts": "Patients with the subject entity (disease or condition) must limit or avoid the nutrient or food specified by the object entity as part of their dietary management.",
+            "requires": "The subject entity (disease or condition) necessitates the implementation or adherence to the dietary recommendation or restriction specified by the object entity."
+        },
+        "canonicalization_candidates": "[{}, {'daily intake': np.float64(0.9642054796981914), 'contains': np.float64(0.8966651025519667), 'recommended for': np.float64(0.8647998864878688), 'food source': np.float64(0.8512086914387975), 'requires': np.float64(0.8431212515825842)}, {}, {}, {}, {}, {}, {}]",
+        "schema_canonicalizaiton": [
+            [
+                "chronic_kidney_disease",
+                "restricts",
+                "protein_intake"
+            ],
+            [
+                "protein_intake",
+                "daily intake",
+                "0.6-0.8_g/kg/day"
+            ],
+            [
+                "chronic_kidney_disease",
+                "restricts",
+                "phosphorus_rich_foods"
+            ],
+            [
+                "dairy_products",
+                "aggravates",
+                "chronic_kidney_disease"
+            ],
+            [
+                "processed_meats",
+                "aggravates",
+                "chronic_kidney_disease"
+            ],
+            [
+                "chronic_kidney_disease_stage_4",
+                "requires",
+                "potassium_restriction"
+            ],
+            [
+                "chronic_kidney_disease_stage_5",
+                "requires",
+                "potassium_restriction"
+            ],
+            [
+                "chronic_kidney_disease",
+                "restricts",
+                "potassium_intake"
+            ]
+        ]
+    },
+    {
+        "index": 3,
+        "input_text": "Iron deficiency anemia responds well to iron supplementation and consumption of iron-rich foods including red meat, spinach, and fortified cereals. Vitamin C enhances iron absorption when consumed with iron-rich foods. Folate deficiency causes megaloblastic anemia and can be treated with folic acid supplementation.\n",
+        "entity_hint": "",
+        "relation_hint": "",
+        "oie": [
+            [
+                "iron_supplementation",
+                "treats",
+                "iron_deficiency_anemia"
+            ],
+            [
+                "vitamin_C",
+                "enhances_absorption_of",
+                "iron"
+            ],
+            [
+                "red_meat",
+                "food_source",
+                "iron"
+            ],
+            [
+                "spinach",
+                "food_source",
+                "iron"
+            ],
+            [
+                "fortified_cereals",
+                "food_source",
+                "iron"
+            ],
+            [
+                "folate_deficiency",
+                "causes",
+                "megaloblastic_anemia"
+            ],
+            [
+                "folic_acid_supplementation",
+                "treats",
+                "folate_deficiency"
+            ],
+            [
+                "folic_acid_supplementation",
+                "treats",
+                "megaloblastic_anemia"
+            ]
+        ],
+        "schema_definition": {
+            "Here are the relation descriptions": "",
+            "causes": "The subject entity (condition or state) leads to or results in the occurrence of the object entity (disease, condition, or state).",
+            "enhances_absorption_of": "The subject entity (nutrient or substance) improves the bioavailability or uptake of the object entity (nutrient) in the body.",
+            "food_source": "The subject entity (food or diet) contains or provides the object entity (nutrient) as an ingredient or component.",
+            "treats": "The subject entity (treatment, supplement, or intervention) is used therapeutically to manage or improve the object entity (disease, condition, or state)."
+        },
+        "canonicalization_candidates": "[{}, {'enhances absorption of': np.float64(0.9298947936920947), 'reduces': np.float64(0.8556465574726975), 'contains': np.float64(0.8441299665195541), 'prevents': np.float64(0.8357235372599111), 'treats': np.float64(0.833962512302813)}, {'contains': np.float64(0.9764995734428902), 'food source': np.float64(0.928806923774443), 'treats': np.float64(0.9101928609478132), 'prevents': np.float64(0.8862506585353549), 'recommended for': np.float64(0.8768138109176937)}, {'contains': np.float64(0.9764995734428902), 'food source': np.float64(0.928806923774443), 'treats': np.float64(0.9101928609478132), 'prevents': np.float64(0.8862506585353549), 'recommended for': np.float64(0.8768138109176937)}, {'contains': np.float64(0.9764995734428902), 'food source': np.float64(0.928806923774443), 'treats': np.float64(0.9101928609478132), 'prevents': np.float64(0.8862506585353549), 'recommended for': np.float64(0.8768138109176937)}, {'symptom of': np.float64(0.8534840464862656), 'aggravates': np.float64(0.83479957377007), 'deficiency causes': np.float64(0.8205164235548095), 'treats': np.float64(0.792598899884635), 'associated with': np.float64(0.7917082476968523)}, {}, {}]",
+        "schema_canonicalizaiton": [
+            [
+                "iron_supplementation",
+                "treats",
+                "iron_deficiency_anemia"
+            ],
+            [
+                "vitamin_C",
+                "enhances absorption of",
+                "iron"
+            ],
+            [
+                "red_meat",
+                "contains",
+                "iron"
+            ],
+            [
+                "spinach",
+                "contains",
+                "iron"
+            ],
+            [
+                "fortified_cereals",
+                "contains",
+                "iron"
+            ],
+            [
+                "folate_deficiency",
+                "deficiency causes",
+                "megaloblastic_anemia"
+            ],
+            [
+                "folic_acid_supplementation",
+                "treats",
+                "folate_deficiency"
+            ],
+            [
+                "folic_acid_supplementation",
+                "treats",
+                "megaloblastic_anemia"
+            ]
+        ]
+    },
+    {
+        "index": 4,
+        "input_text": "Patients with celiac disease must strictly avoid gluten found in wheat, barley, and rye. Zinc deficiency is prevalent in celiac disease patients due to malabsorption. A gluten-free diet reduces intestinal inflammation and promotes nutrient absorption in celiac disease.\n",
+        "entity_hint": "",
+        "relation_hint": "",
+        "oie": [
+            [
+                "celiac_disease",
+                "requires_avoidance_of",
+                "gluten"
+            ],
+            [
+                "gluten",
+                "found_in",
+                "wheat"
+            ],
+            [
+                "gluten",
+                "found_in",
+                "barley"
+            ],
+            [
+                "gluten",
+                "found_in",
+                "rye"
+            ],
+            [
+                "celiac_disease",
+                "causes",
+                "zinc_deficiency"
+            ],
+            [
+                "celiac_disease",
+                "causes",
+                "malabsorption"
+            ],
+            [
+                "gluten_free_diet",
+                "reduces",
+                "intestinal_inflammation"
+            ],
+            [
+                "gluten_free_diet",
+                "promotes",
+                "nutrient_absorption"
+            ],
+            [
+                "gluten_free_diet",
+                "treats",
+                "celiac_disease"
+            ]
+        ],
+        "schema_definition": {
+            "Here are the relation descriptions": "",
+            "requires_avoidance_of": "The subject entity (disease or condition) necessitates the avoidance of the object entity (substance, food, or nutrient) to prevent adverse effects or complications.",
+            "found_in": "The object entity (food, substance, or product) contains the subject entity (nutrient, compound, or ingredient) as a component or ingredient.",
+            "causes": "The subject entity (disease, condition, or factor) leads to or contributes to the development or occurrence of the object entity (disease, condition, or effect).",
+            "reduces": "The subject entity (treatment, intervention, or factor) decreases the level, severity, or impact of the object entity (symptom, condition, or biomarker).",
+            "promotes": "The subject entity (treatment, intervention, or factor) enhances or supports the object entity (process, function, or outcome), leading to a positive effect or improvement.",
+            "treats": "The subject entity (treatment, intervention, or therapy) is used to manage, alleviate, or cure the object entity (disease, condition, or symptom)."
+        },
+        "canonicalization_candidates": "[{'contraindicated for': np.float64(0.8804227860135058), 'prevents': np.float64(0.8614993103079596), 'restricts': np.float64(0.8598345215926297), 'aggravates': np.float64(0.8570099297611927), 'deficiency causes': np.float64(0.8279994576820457)}, {'contains': np.float64(0.9440751886130454), 'food source': np.float64(0.9028101659974548), 'treats': np.float64(0.8610833109006069), 'prevents': np.float64(0.8386153723334973), 'recommended for': np.float64(0.8257323730268419)}, {'contains': np.float64(0.9440751886130454), 'food source': np.float64(0.9028101659974548), 'treats': np.float64(0.8610833109006069), 'prevents': np.float64(0.8386153723334973), 'recommended for': np.float64(0.8257323730268419)}, {'contains': np.float64(0.9440751886130454), 'food source': np.float64(0.9028101659974548), 'treats': np.float64(0.8610833109006069), 'prevents': np.float64(0.8386153723334973), 'recommended for': np.float64(0.8257323730268419)}, {'aggravates': np.float64(0.8505258118668708), 'symptom of': np.float64(0.8420645525726012), 'deficiency causes': np.float64(0.8188603232843494), 'associated with': np.float64(0.8070519131902743), 'prevents': np.float64(0.8004124876250642)}, {'aggravates': np.float64(0.8505258118668708), 'symptom of': np.float64(0.8420645525726012), 'deficiency causes': np.float64(0.8188603232843494), 'associated with': np.float64(0.8070519131902743), 'prevents': np.float64(0.8004124876250642)}, {}, {'prevents': np.float64(0.7843145041157615), 'treats': np.float64(0.7737283561492176), 'reduces': np.float64(0.7715627948488458), 'aggravates': np.float64(0.7585793529830376), 'symptom of': np.float64(0.758482437867289)}, {}]",
+        "schema_canonicalizaiton": [
+            [
+                "celiac_disease",
+                "contraindicated for",
+                "gluten"
+            ],
+            [
+                "gluten",
+                "contains",
+                "wheat"
+            ],
+            [
+                "gluten",
+                "contains",
+                "barley"
+            ],
+            [
+                "gluten",
+                "contains",
+                "rye"
+            ],
+            [
+                "celiac_disease",
+                "associated with",
+                "zinc_deficiency"
+            ],
+            null,
+            [
+                "gluten_free_diet",
+                "reduces",
+                "intestinal_inflammation"
+            ],
+            null,
+            [
+                "gluten_free_diet",
+                "treats",
+                "celiac_disease"
+            ]
+        ]
+    },
+    {
+        "index": 5,
+        "input_text": "Gout patients should avoid purine-rich foods such as organ meats, shellfish, and alcohol, especially beer. Increased water intake helps excrete uric acid and reduces the frequency of gout attacks. Cherries and cherry extract have been shown to reduce uric acid levels in gout patients.\n",
+        "entity_hint": "",
+        "relation_hint": "",
+        "oie": [
+            [
+                "purine_rich_foods",
+                "contraindicated_for",
+                "gout"
+            ],
+            [
+                "organ_meats",
+                "aggravates",
+                "gout"
+            ],
+            [
+                "shellfish",
+                "aggravates",
+                "gout"
+            ],
+            [
+                "alcohol",
+                "aggravates",
+                "gout"
+            ],
+            [
+                "beer",
+                "aggravates",
+                "gout"
+            ],
+            [
+                "water_intake",
+                "reduces",
+                "uric_acid_level"
+            ],
+            [
+                "water_intake",
+                "treats",
+                "gout"
+            ],
+            [
+                "cherries",
+                "reduces",
+                "uric_acid_level"
+            ],
+            [
+                "cherry_extract",
+                "reduces",
+                "uric_acid_level"
+            ],
+            [
+                "cherries",
+                "treats",
+                "gout"
+            ],
+            [
+                "cherry_extract",
+                "treats",
+                "gout"
+            ]
+        ],
+        "schema_definition": {
+            "Here are the relation descriptions": "",
+            "reduces": "The subject entity (food, nutrient, or substance) lowers the level or severity of the condition or biomarker specified by the object entity.",
+            "contraindicated_for": "The subject entity (food, nutrient, or substance) is harmful and must be completely avoided by patients with the condition specified by the object entity.",
+            "aggravates": "The subject entity (food or substance) worsens the symptoms or progression of the disease or condition specified by the object entity.",
+            "treats": "The subject entity (food, nutrient, supplement, or diet) is used therapeutically to manage or improve the disease or condition specified by the object entity."
+        },
+        "canonicalization_candidates": "[{'contraindicated for': np.float64(0.9477544059710441), 'restricts': np.float64(0.9113777606939029), 'aggravates': np.float64(0.8839074591947026), 'prevents': np.float64(0.8776457430223406), 'recommended for': np.float64(0.8750623082013834)}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}]",
+        "schema_canonicalizaiton": [
+            [
+                "purine_rich_foods",
+                "contraindicated for",
+                "gout"
+            ],
+            [
+                "organ_meats",
+                "aggravates",
+                "gout"
+            ],
+            [
+                "shellfish",
+                "aggravates",
+                "gout"
+            ],
+            [
+                "alcohol",
+                "aggravates",
+                "gout"
+            ],
+            [
+                "beer",
+                "aggravates",
+                "gout"
+            ],
+            [
+                "water_intake",
+                "reduces",
+                "uric_acid_level"
+            ],
+            [
+                "water_intake",
+                "treats",
+                "gout"
+            ],
+            [
+                "cherries",
+                "reduces",
+                "uric_acid_level"
+            ],
+            [
+                "cherry_extract",
+                "reduces",
+                "uric_acid_level"
+            ],
+            [
+                "cherries",
+                "treats",
+                "gout"
+            ],
+            [
+                "cherry_extract",
+                "treats",
+                "gout"
+            ]
+        ]
+    },
+    {
+        "index": 6,
+        "input_text": "Osteoporosis prevention requires adequate calcium intake of 1000-1200 mg per day combined with weight-bearing exercise. Vitamin K2 plays a critical role in bone mineralization and reduces fracture risk in osteoporosis patients. Excessive caffeine and alcohol consumption accelerates calcium loss and worsens osteoporosis.\n",
+        "entity_hint": "",
+        "relation_hint": "",
+        "oie": [
+            [
+                "calcium",
+                "prevents",
+                "osteoporosis"
+            ],
+            [
+                "calcium",
+                "daily_intake",
+                "1000-1200_mg/day"
+            ],
+            [
+                "vitamin_K2",
+                "reduces",
+                "fracture_risk"
+            ],
+            [
+                "vitamin_K2",
+                "recommended_for",
+                "osteoporosis"
+            ],
+            [
+                "weight-bearing_exercise",
+                "prevents",
+                "osteoporosis"
+            ],
+            [
+                "caffeine",
+                "worsens",
+                "osteoporosis"
+            ],
+            [
+                "alcohol",
+                "worsens",
+                "osteoporosis"
+            ],
+            [
+                "caffeine",
+                "accelerates",
+                "calcium_loss"
+            ],
+            [
+                "alcohol",
+                "accelerates",
+                "calcium_loss"
+            ]
+        ],
+        "schema_definition": {
+            "Here are the relation descriptions": "",
+            "prevents": "The subject entity (nutrient, food, exercise, or lifestyle habit) helps protect against or reduce the risk of the disease or condition specified by the object entity.",
+            "daily_intake": "The subject entity (nutrient) has a recommended or maximum daily intake amount described by the object entity.",
+            "recommended_for": "The subject entity (nutrient, food, or diet pattern) is specifically recommended for patients with the disease or condition specified by the object entity.",
+            "reduces": "The subject entity (nutrient, food, or lifestyle habit) lowers the level or severity of the biomarker or condition specified by the object entity.",
+            "worsens": "The subject entity (food, substance, or lifestyle habit) exacerbates the symptoms or progression of the disease or condition specified by the object entity.",
+            "accelerates": "The subject entity (food, substance, or lifestyle habit) increases the rate or speed of the process or condition specified by the object entity."
+        },
+        "canonicalization_candidates": "[{}, {'daily intake': np.float64(0.9822183392651641), 'contains': np.float64(0.8874929482897105), 'food source': np.float64(0.8610616920779657), 'recommended for': np.float64(0.8602423462093751), 'requires': np.float64(0.8562848387931135)}, {}, {'recommended for': np.float64(0.9805934970464588), 'treats': np.float64(0.9388677294492547), 'prevents': np.float64(0.9170226872356964), 'contains': np.float64(0.9147396229730582), 'restricts': np.float64(0.9029250917116176)}, {}, {'aggravates': np.float64(0.9375489278798771), 'associated with': np.float64(0.881349947981771), 'prevents': np.float64(0.8610661508395111), 'treats': np.float64(0.8532715803483059), 'deficiency causes': np.float64(0.8475040463157264)}, {'aggravates': np.float64(0.9375489278798771), 'associated with': np.float64(0.881349947981771), 'prevents': np.float64(0.8610661508395111), 'treats': np.float64(0.8532715803483059), 'deficiency causes': np.float64(0.8475040463157264)}, {'associated with': np.float64(0.8312941700950492), 'aggravates': np.float64(0.8257100908956199), 'enhances absorption of': np.float64(0.8084949005147338), 'prevents': np.float64(0.7868926200970547), 'contains': np.float64(0.7782249871739315)}, {'associated with': np.float64(0.8312941700950492), 'aggravates': np.float64(0.8257100908956199), 'enhances absorption of': np.float64(0.8084949005147338), 'prevents': np.float64(0.7868926200970547), 'contains': np.float64(0.7782249871739315)}]",
+        "schema_canonicalizaiton": [
+            [
+                "calcium",
+                "prevents",
+                "osteoporosis"
+            ],
+            [
+                "calcium",
+                "daily intake",
+                "1000-1200_mg/day"
+            ],
+            [
+                "vitamin_K2",
+                "reduces",
+                "fracture_risk"
+            ],
+            [
+                "vitamin_K2",
+                "treats",
+                "osteoporosis"
+            ],
+            [
+                "weight-bearing_exercise",
+                "prevents",
+                "osteoporosis"
+            ],
+            [
+                "caffeine",
+                "aggravates",
+                "osteoporosis"
+            ],
+            [
+                "alcohol",
+                "aggravates",
+                "osteoporosis"
+            ],
+            [
+                "caffeine",
+                "aggravates",
+                "calcium_loss"
+            ],
+            [
+                "alcohol",
+                "aggravates",
+                "calcium_loss"
+            ]
+        ]
+    },
+    {
+        "index": 7,
+        "input_text": "Patients with non-alcoholic fatty liver disease benefit from reducing total calorie intake and increasing consumption of antioxidant-rich foods. Mediterranean diet rich in olive oil, vegetables, and fish reduces liver fat accumulation in fatty liver disease. Fructose overconsumption is strongly associated with the development of non-alcoholic fatty liver disease.\n",
+        "entity_hint": "",
+        "relation_hint": "",
+        "oie": [
+            [
+                "non-alcoholic_fatty_liver_disease",
+                "benefits_from",
+                "reduced_calorie_intake"
+            ],
+            [
+                "antioxidant_rich_foods",
+                "recommended_for",
+                "non-alcoholic_fatty_liver_disease"
+            ],
+            [
+                "mediterranean_diet",
+                "reduces",
+                "liver_fat_accumulation"
+            ],
+            [
+                "olive_oil",
+                "part_of",
+                "mediterranean_diet"
+            ],
+            [
+                "vegetables",
+                "part_of",
+                "mediterranean_diet"
+            ],
+            [
+                "fish",
+                "part_of",
+                "mediterranean_diet"
+            ],
+            [
+                "fructose",
+                "associated_with",
+                "non-alcoholic_fatty_liver_disease"
+            ],
+            [
+                "fructose_overconsumption",
+                "causes",
+                "non-alcoholic_fatty_liver_disease"
+            ]
+        ],
+        "schema_definition": {
+            "Here are the relation descriptions": "",
+            "recommended_for": "The subject entity (nutrient, food, or diet pattern) is specifically recommended for patients with the disease or condition specified by the object entity.",
+            "causes": "The subject entity (food, nutrient, or substance) contributes to the development or progression of the disease or condition specified by the object entity.",
+            "reduces": "The subject entity (nutrient, dietary component, or diet) lowers the level or severity of the biomarker or condition specified by the object entity.",
+            "benefits_from": "The disease or condition specified by the subject entity can be improved or managed by the intervention, treatment, or change specified by the object entity.",
+            "part_of": "The subject entity (food, nutrient, or component) is a constituent or ingredient of the larger entity specified by the object entity.",
+            "associated_with": "The subject entity (food, nutrient, or dietary habit) is correlated with or linked to the increased or decreased occurrence of the condition specified by the object entity."
+        },
+        "canonicalization_candidates": "[{'treats': np.float64(0.8492521530553685), 'aggravates': np.float64(0.8383662699357229), 'symptom of': np.float64(0.8356676617979789), 'prevents': np.float64(0.8258405485568834), 'deficiency causes': np.float64(0.8129921878003356)}, {'recommended for': np.float64(0.9805934970464588), 'treats': np.float64(0.9388677294492547), 'prevents': np.float64(0.9170226872356964), 'contains': np.float64(0.9147396229730582), 'restricts': np.float64(0.9029250917116176)}, {}, {'contains': np.float64(0.9470222107261839), 'food source': np.float64(0.9129533449401825), 'treats': np.float64(0.8789048420396326), 'prevents': np.float64(0.8517590816321372), 'daily intake': np.float64(0.8401054218090634)}, {'contains': np.float64(0.9470222107261839), 'food source': np.float64(0.9129533449401825), 'treats': np.float64(0.8789048420396326), 'prevents': np.float64(0.8517590816321372), 'daily intake': np.float64(0.8401054218090634)}, {'contains': np.float64(0.9470222107261839), 'food source': np.float64(0.9129533449401825), 'treats': np.float64(0.8789048420396326), 'prevents': np.float64(0.8517590816321372), 'daily intake': np.float64(0.8401054218090634)}, {'associated with': np.float64(0.9463952850758544), 'prevents': np.float64(0.8745866233496303), 'aggravates': np.float64(0.8607260825280016), 'reduces': np.float64(0.8496828184559712), 'contains': np.float64(0.8345751517663252)}, {'aggravates': np.float64(0.9297645957872691), 'treats': np.float64(0.9157021857429821), 'prevents': np.float64(0.9154445518328611), 'deficiency causes': np.float64(0.9058512348053892), 'associated with': np.float64(0.893496110172238)}]",
+        "schema_canonicalizaiton": [
+            null,
+            [
+                "antioxidant_rich_foods",
+                "treats",
+                "non-alcoholic_fatty_liver_disease"
+            ],
+            [
+                "mediterranean_diet",
+                "reduces",
+                "liver_fat_accumulation"
+            ],
+            [
+                "olive_oil",
+                "contains",
+                "mediterranean_diet"
+            ],
+            null,
+            null,
+            [
+                "fructose",
+                "aggravates",
+                "non-alcoholic_fatty_liver_disease"
+            ],
+            [
+                "fructose_overconsumption",
+                "associated with",
+                "non-alcoholic_fatty_liver_disease"
+            ]
+        ]
+    },
+    {
+        "index": 8,
+        "input_text": "Hyperthyroidism patients may experience weight loss and increased metabolic rate requiring higher caloric intake. Iodine restriction is recommended for patients undergoing radioactive iodine therapy for hyperthyroidism. Selenium supplementation may help reduce thyroid antibodies in autoimmune thyroid disease.\n",
+        "entity_hint": "",
+        "relation_hint": "",
+        "oie": [
+            [
+                "hyperthyroidism",
+                "causes",
+                "weight_loss"
+            ],
+            [
+                "hyperthyroidism",
+                "causes",
+                "increased_metabolic_rate"
+            ],
+            [
+                "hyperthyroidism",
+                "requires",
+                "higher_caloric_intake"
+            ],
+            [
+                "iodine_restriction",
+                "recommended_for",
+                "radioactive_iodine_therapy"
+            ],
+            [
+                "radioactive_iodine_therapy",
+                "treats",
+                "hyperthyroidism"
+            ],
+            [
+                "selenium_supplementation",
+                "reduces",
+                "thyroid_antibodies"
+            ],
+            [
+                "selenium_supplementation",
+                "treats",
+                "autoimmune_thyroid_disease"
+            ]
+        ],
+        "schema_definition": {
+            "Here are the relation descriptions": "",
+            "causes": "The subject entity (disease, condition, or event) leads to or results in the occurrence of the object entity (symptom, condition, or outcome).",
+            "recommended_for": "The subject entity (treatment, intervention, or approach) is specifically advised or suggested for the object entity (condition, disease, or situation).",
+            "reduces": "The subject entity (treatment, intervention, or substance) decreases the level, severity, or intensity of the object entity (symptom, condition, or biomarker).",
+            "treats": "The subject entity (treatment, intervention, or therapy) is used to manage, alleviate, or improve the object entity (disease, condition, or disorder).",
+            "requires": "The subject entity (condition, disease, or situation) necessitates or demands the presence, provision, or increase of the object entity (resource, intervention, or requirement)."
+        },
+        "canonicalization_candidates": "[{'symptom of': np.float64(0.8619490936900279), 'aggravates': np.float64(0.8259816145509353), 'deficiency causes': np.float64(0.7923794382475342), 'associated with': np.float64(0.7767877807474658), 'treats': np.float64(0.7696675521624154)}, {'symptom of': np.float64(0.8619490936900279), 'aggravates': np.float64(0.8259816145509353), 'deficiency causes': np.float64(0.7923794382475342), 'associated with': np.float64(0.7767877807474658), 'treats': np.float64(0.7696675521624154)}, {}, {'recommended for': np.float64(0.8493834096909808), 'treats': np.float64(0.845017598282371), 'prevents': np.float64(0.8138830752765571), 'symptom of': np.float64(0.787765352762698), 'contraindicated for': np.float64(0.7861731679666346)}, {}, {}, {}]",
+        "schema_canonicalizaiton": [
+            null,
+            null,
+            [
+                "hyperthyroidism",
+                "requires",
+                "higher_caloric_intake"
+            ],
+            [
+                "iodine_restriction",
+                "recommended for",
+                "radioactive_iodine_therapy"
+            ],
+            [
+                "radioactive_iodine_therapy",
+                "treats",
+                "hyperthyroidism"
+            ],
+            [
+                "selenium_supplementation",
+                "reduces",
+                "thyroid_antibodies"
+            ],
+            [
+                "selenium_supplementation",
+                "treats",
+                "autoimmune_thyroid_disease"
+            ]
+        ]
+    },
+    {
+        "index": 9,
+        "input_text": "Children with phenylketonuria must follow a phenylalanine-restricted diet to prevent neurological damage. Low-phenylalanine medical formulas provide essential amino acids for phenylketonuria patients. Regular blood phenylalanine monitoring is essential to adjust dietary intake in phenylketonuria management.\n",
+        "entity_hint": "",
+        "relation_hint": "",
+        "oie": [
+            [
+                "phenylketonuria",
+                "requires",
+                "phenylalanine-restricted_diet"
+            ],
+            [
+                "phenylalanine-restricted_diet",
+                "prevents",
+                "neurological_damage"
+            ],
+            [
+                "low-phenylalanine_medical_formulas",
+                "provides",
+                "essential_amino_acids"
+            ],
+            [
+                "essential_amino_acids",
+                "required_for",
+                "phenylketonuria"
+            ],
+            [
+                "blood_phenylalanine_monitoring",
+                "essential_for",
+                "phenylketonuria_management"
+            ]
+        ],
+        "schema_definition": {
+            "Here are the relation descriptions": "",
+            "requires": "The subject entity (disease, condition, or situation) necessitates or demands the presence, action, or implementation of the object entity (treatment, intervention, or resource).",
+            "prevents": "The subject entity (action, intervention, or treatment) helps to avoid, reduce, or mitigate the occurrence or severity of the object entity (disease, condition, or undesirable outcome).",
+            "provides": "The subject entity (source, agent, or entity) supplies, furnishes, or makes available the object entity (resource, benefit, or necessity) to someone or something.",
+            "required_for": "The object entity (disease, condition, or situation) necessitates or demands the presence, action, or availability of the subject entity (resource, treatment, or intervention).",
+            "essential_for": "The subject entity (action, intervention, or component) is crucial, necessary, or vital for the object entity (process, outcome, or situation) to occur, function, or succeed."
+        },
+        "canonicalization_candidates": "[{}, {}, {'contains': np.float64(0.7557201813055959), 'treats': np.float64(0.7531601461758202), 'food source': np.float64(0.7457076583337281), 'prevents': np.float64(0.7329686810097414), 'deficiency causes': np.float64(0.7277338756625994)}, {'deficiency causes': np.float64(0.7884359821541541), 'treats': np.float64(0.774366276103864), 'symptom of': np.float64(0.7621329956457931), 'aggravates': np.float64(0.7562396327584326), 'prevents': np.float64(0.7376779064799324)}, {'symptom of': np.float64(0.701061741212023), 'treats': np.float64(0.6977888557068019), 'prevents': np.float64(0.6962944058064919), 'deficiency causes': np.float64(0.687657451360002), 'contains': np.float64(0.6868586160823249)}]",
+        "schema_canonicalizaiton": [
+            [
+                "phenylketonuria",
+                "requires",
+                "phenylalanine-restricted_diet"
+            ],
+            [
+                "phenylalanine-restricted_diet",
+                "prevents",
+                "neurological_damage"
+            ],
+            [
+                "low-phenylalanine_medical_formulas",
+                "contains",
+                "essential_amino_acids"
+            ],
+            null,
+            null
+        ]
+    }
+]

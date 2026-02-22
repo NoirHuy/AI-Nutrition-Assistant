@@ -1,41 +1,36 @@
 from fastapi import FastAPI, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from contextlib import asynccontextmanager
-from app.database import db
-from app.services.ai_chat import analyze_image_diet
+from fastapi.middleware.cors import CORSMiddleware
+from app.services.ai_chat import analyze_image_diet, generate_response
 
-class ImageRequest(BaseModel):
-    image_base64: str
-    disease: str
+app = FastAPI()
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    db.connect()
-    yield
-    db.close()
-
-app = FastAPI(lifespan=lifespan)
-
-# --- QUAN TRỌNG: PHẦN MỞ CỬA CHO FRONTEND ---
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # Cho phép tất cả các nguồn truy cập
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-# --------------------------------------------
+
+class ChatRequest(BaseModel):
+    question: str
+    disease: str
+
+class VisionRequest(BaseModel):
+    image_base64: str
+    disease: str
 
 @app.get("/")
 def read_root():
-    return {"status": "Backend is running"}
+    return {"status": "AI Nutrition System Ready"}
+
+@app.post("/api/chat")
+async def chat_endpoint(request: ChatRequest):
+    response = generate_response(request.question, request.disease)
+    return {"bot_response": response}
 
 @app.post("/api/vision")
-async def vision_endpoint(req: ImageRequest):
-    if not req.image_base64:
-        raise HTTPException(status_code=400, detail="Thiếu ảnh")
-    
-    # Gọi AI phân tích
-    answer = analyze_image_diet(req.image_base64, req.disease)
-    return {"bot_response": answer}
+async def vision_endpoint(request: VisionRequest):
+    response = analyze_image_diet(request.image_base64, request.disease)
+    return {"bot_response": response}

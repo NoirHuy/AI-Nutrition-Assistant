@@ -180,7 +180,7 @@ function App() {
 
         {/* CARD 3: UPLOAD ẢNH */}
         <div className="card">
-          <div className="card-title"><Upload size={20}/> Tải ảnh có sẵn</div>
+          <div className="card-title"><Upload size={20}/> Tải ảnh thức ăn từ thiết bị</div>
           <input type="file" ref={fileInputRef} onChange={handleUpload} hidden accept="image/*" />
           
           <div className="upload-area" onClick={() => fileInputRef.current.click()}>
@@ -257,7 +257,7 @@ function App() {
             <div style={{flex: 1, overflowY: 'auto'}}>
               {loading ? (
                 <div style={{textAlign:'center', padding:40, color:'#666'}}>
-                  <p style={{fontSize: '1.1rem', fontWeight: 500}}>🤖 AI Maverick & GPT-OSS đang làm việc...</p>
+                  <p style={{fontSize: '1.1rem', fontWeight: 500}}>🤖 Hệ thống đang làm việc...</p>
                   <p>Đang nhận diện món ăn và tra cứu dữ liệu y khoa.</p>
                   <div className="loader" style={{marginTop: 20, justifyContent: 'center'}}>
                     <span style={{animation: 'pulse 1s infinite'}}>Thinking...</span>

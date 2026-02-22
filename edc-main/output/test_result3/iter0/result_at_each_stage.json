@@ -1,0 +1,41 @@
+[
+    {
+        "index": 0,
+        "input_text": "John Doe is a student at National University of Singapore.",
+        "entity_hint": "",
+        "relation_hint": "",
+        "oie": [
+            [
+                "John_Doe",
+                "isA",
+                "student"
+            ],
+            [
+                "John_Doe",
+                "attends",
+                "National_University_of_Singapore"
+            ],
+            [
+                "National_University_of_Singapore",
+                "hasStudent",
+                "John_Doe"
+            ]
+        ],
+        "schema_definition": {
+            "Here are the relation descriptions": "",
+            "attends": "The subject entity attends or is a student at the institution specified by the object entity.",
+            "hasStudent": "The subject entity has the person specified by the object entity as a student.",
+            "isA": "The subject entity is an instance or example of the type specified by the object entity."
+        },
+        "canonicalization_candidates": "[{'contains settlement': np.float64(0.850977090149506), 'contains administrative territorial entity': np.float64(0.8359238300747295), 'country': np.float64(0.8347294926441664), 'located in the administrative territorial entity': np.float64(0.8261523283028751), 'place of birth': np.float64(0.8101689833198725)}, {'student': np.float64(0.8637163004698564), 'contains settlement': np.float64(0.7965556843398031), 'country': np.float64(0.7918944408052274), 'located in the administrative territorial entity': np.float64(0.787104055187043), 'contains administrative territorial entity': np.float64(0.7756127368571498)}, {'contains settlement': np.float64(0.8161503127432521), 'country': np.float64(0.8067433033005909), 'student': np.float64(0.8067374194253044), 'place of birth': np.float64(0.7926416537500101), 'start time': np.float64(0.7844773510119945)}]",
+        "schema_canonicalizaiton": [
+            null,
+            [
+                "John_Doe",
+                "student",
+                "National_University_of_Singapore"
+            ],
+            null
+        ]
+    }
+]

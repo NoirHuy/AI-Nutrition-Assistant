@@ -1,0 +1,23 @@
+Example 1:
+Text: Patients with type 2 diabetes should limit refined carbohydrates and increase dietary fiber intake.
+Triplets: [['dietary_fiber', 'recommended_for', 'type_2_diabetes'], ['refined_carbohydrates', 'aggravates', 'type_2_diabetes']]
+
+Example 2:
+Text: Vitamin D deficiency is commonly observed in patients with hypertension and cardiovascular disease. Calcium supplementation combined with vitamin D may help regulate blood pressure.
+Triplets: [['vitamin_D', 'deficiency_causes', 'hypertension'], ['calcium_supplementation', 'treats', 'hypertension'], ['vitamin_D', 'required', 'blood_pressure_regulation']]
+
+Example 3:
+Text: Chronic kidney disease patients must restrict protein intake to 0.6-0.8 grams per kilogram of body weight per day. Phosphorus-rich foods should be limited in patients with chronic kidney disease.
+Triplets: [['chronic_kidney_disease', 'restricts', 'protein_intake'], ['chronic_kidney_disease', 'restricts', 'phosphorus_rich_foods'], ['protein_intake', 'daily_intake', '0.6-0.8_g/kg/day']]
+
+Example 4:
+Text: Iron deficiency anemia responds well to iron supplementation and consumption of iron-rich foods including red meat and spinach. Vitamin C enhances iron absorption when consumed with iron-rich foods.
+Triplets: [['iron_supplementation', 'treats', 'iron_deficiency_anemia'], ['vitamin_C', 'enhances_absorption_of', 'iron'], ['red_meat', 'food_source', 'iron'], ['spinach', 'food_source', 'iron']]
+
+Example 5:
+Text: Gout patients should avoid purine-rich foods such as organ meats, shellfish, and alcohol. Increased water intake helps excrete uric acid and reduces gout attacks.
+Triplets: [['purine_rich_foods', 'contraindicated_for', 'gout'], ['organ_meats', 'aggravates', 'gout'], ['water_intake', 'reduces', 'uric_acid_level'], ['water_intake', 'treats', 'gout']]
+
+Example 6:
+Text: Osteoporosis prevention requires adequate calcium intake of 1000-1200 mg per day combined with weight-bearing exercise. Vitamin K2 plays a critical role in bone mineralization and reduces fracture risk.
+Triplets: [['calcium', 'prevents', 'osteoporosis'], ['calcium', 'daily_intake', '1000-1200_mg/day'], ['vitamin_K2', 'reduces', 'fracture_risk'], ['vitamin_K2', 'recommended_for', 'osteoporosis']]

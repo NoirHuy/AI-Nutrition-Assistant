@@ -1,31 +1,30 @@
 from neo4j import GraphDatabase
 from app.config import settings
 
-class Neo4jConnection:
-    def __init__(self):
-        self.driver = None
+# Biến toàn cục lưu kết nối
+_driver = None
 
-    def connect(self):
+def get_db_driver():
+    """
+    Tạo hoặc lấy kết nối tới Neo4j.
+    """
+    global _driver
+    if _driver is None:
         try:
-            self.driver = GraphDatabase.driver(
+            _driver = GraphDatabase.driver(
                 settings.NEO4J_URI,
                 auth=(settings.NEO4J_USER, settings.NEO4J_PASSWORD)
             )
+            # Thử kết nối xem có sống không
+            _driver.verify_connectivity()
             print("✅ Đã kết nối thành công tới Neo4j!")
         except Exception as e:
             print(f"❌ Lỗi kết nối Neo4j: {e}")
+            _driver = None
+    return _driver
 
-    def close(self):
-        if self.driver:
-            self.driver.close()
-
-    def query(self, query, parameters=None):
-        if not self.driver:
-            self.connect()
-            
-        with self.driver.session() as session:
-            result = session.run(query, parameters)
-            return [record.data() for record in result]
-
-# --- DÒNG QUAN TRỌNG NHẤT BẠN ĐANG THIẾU LÀ Ở ĐÂY: ---
-db = Neo4jConnection()
+def close_driver():
+    global _driver
+    if _driver:
+        _driver.close()
+        _driver = None

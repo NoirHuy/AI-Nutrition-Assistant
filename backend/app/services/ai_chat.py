@@ -1,34 +1,23 @@
 from groq import Groq
 from app.config import settings
-from app.services.graph_query import get_dietary_advice
+from app.services.graph_query import get_dietary_advice, get_food_nutrients
 
-# 1. Khởi tạo Client
+# Kết nối Client
 client = None
 try:
     if settings.GROQ_API_KEY:
         client = Groq(api_key=settings.GROQ_API_KEY)
-        print("✅ Đã kết nối AI Server")
-    else:
-        print("⚠️ Chưa có API Key")
 except Exception as e:
-    print(f"❌ Lỗi kết nối Groq: {e}")
+    print(f"❌ Lỗi Config AI: {e}")
 
-# ==========================================
-# BƯỚC 1: DÙNG LLAMA-4 ĐỂ NHÌN ẢNH (VISION)
-# ==========================================
-def identify_food_from_image(image_base64: str):
-    prompt = """
-    Nhìn vào bức ảnh này và cho tôi biết chính xác:
-    1. Tên món ăn là gì?
-    2. Các thành phần nguyên liệu chính (ước lượng).
-    3. Ước lượng Calo và lượng Đường/Tinh bột.
-    
-    Chỉ trả lời thông tin món ăn, không cần đưa ra lời khuyên y tế.
-    """
+# --- VISION: DÙNG LLAMA-4 MAVERICK ---
+def identify_food_name(image_base64: str):
+    # Prompt ngắn gọn để lấy tên món
+    prompt = "Đây là món ăn gì của Việt Nam? Chỉ trả lời ngắn gọn tên món. Ví dụ: Phở bò"
     
     try:
         completion = client.chat.completions.create(
-            # 👇 MODEL 1: CHUYÊN NHẬN DIỆN ẢNH
+            # 👇 MODEL 1: THEO YÊU CẦU CỦA BẠN
             model="meta-llama/llama-4-maverick-17b-128e-instruct",
             messages=[
                 {
@@ -39,79 +28,80 @@ def identify_food_from_image(image_base64: str):
                     ]
                 }
             ],
-            temperature=0.5,
-            max_completion_tokens=500
+            temperature=0.2, 
+            max_completion_tokens=50
         )
-        return completion.choices[0].message.content
+        return completion.choices[0].message.content.strip()
     except Exception as e:
         print(f"❌ Lỗi Vision: {e}")
         return None
 
-# ==========================================
-# BƯỚC 2: DÙNG GPT-OSS ĐỂ TƯ VẤN (REASONING)
-# ==========================================
-def generate_medical_advice(food_info: str, disease: str):
-    # Lấy dữ liệu từ Neo4j (Graph)
-    data = get_dietary_advice(disease)
+# --- REASONING: DÙNG GPT-OSS-120B ---
+def generate_medical_advice(food_name: str, disease: str):
+    # 1. Lấy dữ liệu từ Graph
+    disease_data = get_dietary_advice(disease)
+    food_graph_data = get_food_nutrients(food_name)
     
-    disease_context = f"Bệnh nhân bị bệnh: {disease}."
-    if data:
-        disease_context += f"\n- Các chất CẦN TRÁNH: {', '.join(data['avoid_nutrients'])}"
-        disease_context += f"\n- Các món ĐẠI KỴ: {', '.join(data['avoid_foods'][:20])}"
+    # 2. Chuẩn bị ngữ cảnh
+    context = f"Bệnh nhân bị: {disease}."
+    if disease_data:
+        context += f"\n- QUY TẮC CẤM (Từ Graph): {', '.join(disease_data['avoid_nutrients'])}"
     
+    food_info = f"Món ăn: {food_name}"
+    
+    # Ưu tiên dữ liệu Graph nếu có
+    if food_graph_data:
+        food_info += f"\n(DỮ LIỆU GỐC TỪ GRAPH - ƯU TIÊN SỐ 1)"
+        food_info += f"\n- Tên chuẩn: {food_graph_data['found_name']}"
+        food_info += f"\n- Thành phần dinh dưỡng: {', '.join([n['name'] for n in food_graph_data['ingredients']])}"
+    else:
+        food_info += "\n(Món này chưa có trong Graph, hãy tự ước lượng)."
+
+    # 3. Prompt Tư vấn
     system_prompt = f"""
-    Bạn là Bác sĩ Dinh dưỡng AI chuyên sâu (Sử dụng model GPT-OSS-120B).
+    Bạn là Trợ lý Dinh dưỡng AI.
     
-    DỮ LIỆU BỆNH ÁN:
-    {disease_context}
-    
-    THÔNG TIN MÓN ĂN (Từ Vision AI gửi sang):
+    DỮ LIỆU ĐẦU VÀO:
+    {context}
     {food_info}
     
-    NHIỆM VỤ:
-    Dựa vào thông tin món ăn và hồ sơ bệnh lý trên, hãy đưa ra lời khuyên chi tiết:
-    1. Người bệnh {disease} CÓ ĐƯỢC ĂN KHÔNG? (Trả lời Có/Không/Hạn chế)
-    2. Giải thích tại sao dựa trên thành phần dinh dưỡng.
-    3. Nếu ăn thì cần lưu ý gì?
+    YÊU CẦU:
+    - Nếu có dữ liệu Graph, hãy điền chính xác vào bảng.
+    - So sánh thành phần với "QUY TẮC CẤM". Nếu trùng -> Ghi "⚠️ VI PHẠM".
     
-    Văn phong: Chuyên gia, ân cần, dễ hiểu. Dùng icon sinh động.
+    FORMAT TRẢ LỜI (Markdown):
+    ## 🍲 Kết quả: {food_name}
+    | Thành phần | Đánh giá |
+    |---|---|
+    | ... | ... |
+    **Lời khuyên:** ...
     """
 
     try:
         completion = client.chat.completions.create(
-            # 👇 MODEL 2: CHUYÊN LÝ LUẬN/GIẢI THÍCH
+            # 👇 MODEL 2: THEO YÊU CẦU CỦA BẠN
             model="openai/gpt-oss-120b", 
             messages=[
                 {"role": "system", "content": system_prompt},
-                {"role": "user", "content": "Hãy phân tích và đưa ra lời khuyên."}
+                {"role": "user", "content": "Phân tích ngay."}
             ],
-            temperature=0.7,
-            max_completion_tokens=1000
+            temperature=0.3
         )
         return completion.choices[0].message.content
     except Exception as e:
-        return f"Lỗi Reasoning: {e}"
+        return f"Lỗi Tư vấn: {e}"
 
-# ==========================================
-# HÀM CHÍNH (MAIN FLOW)
-# ==========================================
+# --- MAIN ENTRY ---
 def analyze_image_diet(image_base64: str, disease: str):
-    if not client: return "Lỗi Server: Chưa cấu hình API Key."
-
-    # Bước 1: Gọi Model Vision để nhận diện món
-    print("👀 Đang gọi Llama-4 Maverick để nhìn ảnh...")
-    food_description = identify_food_from_image(image_base64)
+    if not client: return "Lỗi Server: Chưa có Key AI."
     
-    if not food_description:
-        return "Xin lỗi, AI không nhìn rõ món ăn trong ảnh. Bạn chụp lại thử xem?"
-
-    # Bước 2: Gọi Model GPT-OSS để tư vấn
-    print(f"🧠 Đang gọi GPT-OSS-120B để tư vấn cho bệnh {disease}...")
-    final_advice = generate_medical_advice(food_description, disease)
+    # B1: Gọi Llama-4 Maverick
+    detected_name = identify_food_name(image_base64)
+    if not detected_name:
+        return "⚠️ Không nhìn rõ ảnh. Vui lòng chụp lại hoặc nhập tên món."
     
-    return final_advice
+    # B2: Gọi GPT-OSS-120B
+    return generate_medical_advice(detected_name, disease)
 
-# Hàm hỗ trợ chat text thường (nếu cần)
-def generate_response(user_question: str, disease: str):
-    # Logic tương tự Bước 2 nhưng input là câu hỏi người dùng
-    return generate_medical_advice(user_question, disease)
+def generate_response(user_text: str, disease: str):
+    return generate_medical_advice(user_text, disease)

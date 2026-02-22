@@ -1,0 +1,15 @@
+treats,The subject entity (nutrient/food/diet) is used to treat or manage the disease or condition specified by the object entity.
+prevents,The subject entity (nutrient/food/diet) helps prevent or reduce the risk of the disease or condition specified by the object entity.
+aggravates,The subject entity (food/substance) worsens or increases the risk of the disease or condition specified by the object entity.
+recommended for,The subject entity (food/nutrient/diet) is recommended for patients with the disease or condition specified by the object entity.
+contraindicated for,The subject entity (food/nutrient/substance) is contraindicated or should be avoided by patients with the condition specified by the object entity.
+deficiency causes,Deficiency of the subject entity (nutrient) causes the disease or health condition specified by the object entity.
+enhances absorption of,The subject entity (nutrient/food) enhances the absorption of the nutrient specified by the object entity.
+restricts,Patients with the subject entity (disease) must restrict or limit the intake of the nutrient or food specified by the object entity.
+requires,Patients with the subject entity (disease) require supplementation or adequate intake of the nutrient specified by the object entity.
+contains,The subject entity (food/diet) contains the nutrient or compound specified by the object entity.
+reduces,The subject entity (nutrient/food/diet) reduces the level or severity of the condition or biomarker specified by the object entity.
+associated with,The subject entity (food/nutrient/habit) is associated with the increased or decreased risk of the condition specified by the object entity.
+daily intake,The subject entity (nutrient) has a recommended daily intake amount specified by the object entity.
+food source,The subject entity (nutrient) can be found in the food source specified by the object entity.
+symptom of,The subject entity (clinical sign or biomarker change) is a symptom or manifestation of the disease specified by the object entity.

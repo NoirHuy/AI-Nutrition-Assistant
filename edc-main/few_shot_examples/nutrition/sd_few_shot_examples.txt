@@ -1,0 +1,56 @@
+Example 1:
+Text: Patients with type 2 diabetes should limit refined carbohydrates and increase dietary fiber intake. Omega-3 fatty acids from fish oil may reduce insulin resistance in diabetic patients.
+Triples: [['dietary_fiber', 'recommended_for', 'type_2_diabetes'], ['refined_carbohydrates', 'aggravates', 'type_2_diabetes'], ['omega-3_fatty_acids', 'reduces', 'insulin_resistance']]
+Relations: ['recommended_for', 'aggravates', 'reduces']
+Answer:
+recommended_for: The subject entity (nutrient, food, or diet pattern) is specifically recommended for patients with the disease or condition specified by the object entity.
+aggravates: The subject entity (food or substance) worsens the symptoms or progression of the disease or condition specified by the object entity.
+reduces: The subject entity (nutrient or dietary component) lowers the level or severity of the biomarker or condition specified by the object entity.
+
+Example 2:
+Text: Vitamin D deficiency is commonly observed in patients with hypertension. Calcium supplementation combined with vitamin D may help regulate blood pressure. Excessive sodium intake increases the risk of hypertension.
+Triples: [['vitamin_D', 'deficiency_causes', 'hypertension'], ['calcium_supplementation', 'treats', 'hypertension'], ['sodium', 'aggravates', 'hypertension'], ['sodium', 'daily_intake', '2300_mg_max']]
+Relations: ['deficiency_causes', 'treats', 'aggravates', 'daily_intake']
+Answer:
+deficiency_causes: Insufficient intake or absorption of the subject entity (nutrient) causes or contributes to the disease or health condition specified by the object entity.
+treats: The subject entity (nutrient, supplement, or diet) is used therapeutically to manage or improve the disease or condition specified by the object entity.
+aggravates: The subject entity (food or substance) worsens the symptoms or progression of the disease or condition specified by the object entity.
+daily_intake: The subject entity (nutrient) has a recommended or maximum daily intake amount described by the object entity.
+
+Example 3:
+Text: Chronic kidney disease patients must restrict protein intake. Phosphorus-rich foods should be limited. Potassium restriction is required for patients with stage 4 and 5 CKD.
+Triples: [['chronic_kidney_disease', 'restricts', 'protein_intake'], ['chronic_kidney_disease', 'restricts', 'phosphorus_rich_foods'], ['chronic_kidney_disease_stage_4_5', 'restricts', 'potassium']]
+Relations: ['restricts']
+Answer:
+restricts: Patients with the subject entity (disease or condition) must limit or avoid the nutrient or food specified by the object entity as part of their dietary management.
+
+Example 4:
+Text: Iron deficiency anemia responds well to iron supplementation and iron-rich foods. Vitamin C enhances iron absorption when consumed together. Folate deficiency causes megaloblastic anemia and is treated with folic acid.
+Triples: [['iron_supplementation', 'treats', 'iron_deficiency_anemia'], ['vitamin_C', 'enhances_absorption_of', 'iron'], ['folate', 'deficiency_causes', 'megaloblastic_anemia'], ['folic_acid', 'treats', 'megaloblastic_anemia']]
+Relations: ['treats', 'enhances_absorption_of', 'deficiency_causes']
+Answer:
+treats: The subject entity (nutrient, supplement, or diet) is used therapeutically to manage or improve the disease or condition specified by the object entity.
+enhances_absorption_of: The subject entity (nutrient or food) improves the bioavailability or uptake of the nutrient specified by the object entity in the body.
+deficiency_causes: Insufficient intake or absorption of the subject entity (nutrient) causes or contributes to the disease or health condition specified by the object entity.
+
+Example 5:
+Text: Patients with celiac disease must strictly avoid gluten found in wheat, barley, and rye. Zinc deficiency is prevalent due to malabsorption. A gluten-free diet reduces intestinal inflammation.
+Triples: [['gluten', 'contraindicated_for', 'celiac_disease'], ['wheat', 'contains', 'gluten'], ['zinc', 'deficiency_causes', 'malabsorption'], ['gluten_free_diet', 'treats', 'celiac_disease'], ['gluten_free_diet', 'reduces', 'intestinal_inflammation']]
+Relations: ['contraindicated_for', 'contains', 'deficiency_causes', 'treats', 'reduces']
+Answer:
+contraindicated_for: The subject entity (food, nutrient, or substance) is harmful and must be completely avoided by patients with the condition specified by the object entity.
+contains: The subject entity (food or diet) contains the nutrient or compound specified by the object entity as an ingredient or component.
+deficiency_causes: Insufficient intake or absorption of the subject entity (nutrient) causes or contributes to the disease or health condition specified by the object entity.
+treats: The subject entity (nutrient, supplement, or diet) is used therapeutically to manage or improve the disease or condition specified by the object entity.
+reduces: The subject entity (nutrient or dietary component) lowers the level or severity of the biomarker or condition specified by the object entity.
+
+Example 6:
+Text: Osteoporosis prevention requires adequate calcium intake of 1000-1200 mg per day. Vitamin K2 plays a critical role in bone mineralization. Excessive caffeine accelerates calcium loss and worsens osteoporosis.
+Triples: [['calcium', 'prevents', 'osteoporosis'], ['calcium', 'daily_intake', '1000-1200_mg/day'], ['vitamin_K2', 'recommended_for', 'osteoporosis'], ['caffeine', 'aggravates', 'osteoporosis'], ['caffeine', 'associated_with', 'calcium_loss']]
+Relations: ['prevents', 'daily_intake', 'recommended_for', 'aggravates', 'associated_with']
+Answer:
+prevents: The subject entity (nutrient, food, or dietary pattern) helps protect against or reduce the risk of the disease or condition specified by the object entity.
+daily_intake: The subject entity (nutrient) has a recommended or maximum daily intake amount described by the object entity.
+recommended_for: The subject entity (nutrient, food, or diet pattern) is specifically recommended for patients with the disease or condition specified by the object entity.
+aggravates: The subject entity (food or substance) worsens the symptoms or progression of the disease or condition specified by the object entity.
+associated_with: The subject entity (food, nutrient, or dietary habit) is correlated with or linked to the increased or decreased occurrence of the condition specified by the object entity.
