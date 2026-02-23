@@ -271,3 +271,224 @@ Input: {image_base64: "...", disease: "Tiểu đường"}
 | KG triples không đủ phủ → UX kém | Cao | Ưu tiên mở rộng KG |
 | Semantic mapping sai → tư vấn sai | Trung bình | Hiển thị node được ánh xạ để user kiểm tra |
 | Docker container crash (Neo4j) | Thấp | Volume mount đã được cấu hình |
+
+---
+
+## 📐 SƠ ĐỒ UML
+
+### 1. Use Case Diagram — Các trường hợp sử dụng
+
+```mermaid
+flowchart TD
+    User["👤 Người dùng"]
+    Admin["🛠️ Admin / Dev"]
+
+    UC1["Chọn bệnh lý"]
+    UC2["Nhập tên món ăn"]
+    UC3["Upload ảnh món ăn"]
+    UC4["Xem lời khuyên dinh dưỡng"]
+    UC5["Xem dữ liệu Knowledge Graph"]
+    UC6["Import KG vào Neo4j"]
+    UC7["Chạy pipeline trích xuất KG"]
+    UC8["Cập nhật API Key"]
+
+    User --> UC1
+    User --> UC2
+    User --> UC3
+    UC2 --> UC4
+    UC3 --> UC4
+    UC4 --> UC5
+
+    Admin --> UC6
+    Admin --> UC7
+    Admin --> UC8
+```
+
+---
+
+### 2. Sequence Diagram — Luồng Chat API
+
+```mermaid
+sequenceDiagram
+    actor User as 👤 Người dùng
+    participant FE as Frontend (React)
+    participant API as Backend (FastAPI)
+    participant Neo4j as Neo4j KG
+    participant LLM as Groq LLM
+
+    User->>FE: Nhập món ăn + chọn bệnh
+    FE->>API: POST /api/chat {question, disease}
+
+    API->>Neo4j: Query trực tiếp (CONTAINS match)
+    Neo4j-->>API: Kết quả (có thể rỗng)
+
+    alt Không tìm thấy node
+        API->>Neo4j: MATCH all nodes
+        Neo4j-->>API: Danh sách tất cả node KG
+        API->>LLM: Semantic mapping (ánh xạ input → node KG)
+        LLM-->>API: ["đồ_uống_có_đường"]
+        API->>Neo4j: Query với node đã ánh xạ
+        Neo4j-->>API: Triples + quan hệ
+    end
+
+    API->>Neo4j: Query disease avoid-relations
+    Neo4j-->>API: Các chất cần tránh
+
+    API->>LLM: Tạo lời khuyên từ KG context
+    LLM-->>API: Markdown response
+
+    API-->>FE: {bot_response: "..."}
+    FE-->>User: Hiển thị kết quả
+```
+
+---
+
+### 3. Sequence Diagram — Luồng Vision API
+
+```mermaid
+sequenceDiagram
+    actor User as 👤 Người dùng
+    participant FE as Frontend (React)
+    participant API as Backend (FastAPI)
+    participant Vision as Llama-4 Maverick
+    participant Chat as Chat Pipeline
+
+    User->>FE: Upload ảnh + chọn bệnh
+    FE->>API: POST /api/vision {image_base64, disease}
+
+    API->>Vision: Nhận diện tên món ăn
+    Vision-->>API: "Phở bò"
+
+    API->>Chat: generate_medical_advice("Phở bò", disease)
+    Note over Chat: Luồng tương tự Chat API
+    Chat-->>API: Kết quả + lời khuyên
+
+    API-->>FE: {bot_response: "..."}
+    FE-->>User: Hiển thị kết quả
+```
+
+---
+
+### 4. Class Diagram — Backend Components
+
+```mermaid
+classDiagram
+    class FastAPI {
+        +GET /
+        +POST /api/chat
+        +POST /api/vision
+    }
+
+    class ChatRequest {
+        +str question
+        +str disease
+    }
+
+    class VisionRequest {
+        +str image_base64
+        +str disease
+    }
+
+    class AIChat {
+        +identify_food_name(image_base64) str
+        +map_input_to_kg_nodes(input, nodes) list
+        +generate_medical_advice(query, disease) str
+        +analyze_image_diet(image_base64, disease) str
+        +generate_response(text, disease) str
+    }
+
+    class GraphQuery {
+        +get_all_kg_nodes() list
+        +get_dietary_advice(disease) dict
+        +get_food_nutrients(food_name) dict
+        +get_node_relations(node_name) list
+    }
+
+    class Neo4jDriver {
+        +uri: str
+        +user: str
+        +password: str
+        +session()
+    }
+
+    class GroqClient {
+        +api_key: str
+        +chat.completions.create()
+    }
+
+    FastAPI --> ChatRequest
+    FastAPI --> VisionRequest
+    FastAPI --> AIChat
+    AIChat --> GraphQuery
+    AIChat --> GroqClient
+    GraphQuery --> Neo4jDriver
+```
+
+---
+
+### 5. Activity Diagram — Pipeline Xây Dựng KG
+
+```mermaid
+flowchart TD
+    A([Bắt đầu]) --> B[Đọc văn bản y khoa\ndatasets/diabetes_en.txt]
+    B --> C[Tiền xử lý văn bản\npreprocess_document_en.py]
+    C --> D{Chia thành\ncác đoạn nhỏ}
+
+    D --> E[Phase 1: OIE\nGroq LLM trích xuất\nbộ ba S-R-O thô]
+    E --> F[Phase 2: SD\nLLM định nghĩa ngữ nghĩa\ncủa từng quan hệ]
+    F --> G[Phase 3: SC\nJina Embeddings tính\ncosine similarity]
+    G --> H{Cosine > threshold?}
+    H -- Có --> I[Ánh xạ vào\nschema chuẩn]
+    H -- Không --> J[Loại bỏ triple]
+    I --> K[Lưu vào\nkg_raw.txt]
+    J --> K
+
+    K --> L[Deduplication\npostprocess_kg_en.py\nJina Embeddings]
+    L --> M[kg_deduplicated.txt\n39 triples]
+    M --> N[Dịch sang tiếng Việt\ntranslate_kg_to_neo4j.py\nGroq LLM]
+    N --> O[kg_vi.txt\n39 triples tiếng Việt]
+    O --> P[Import vào Neo4j\nimport_to_neo4j.py\nLabel: TieuDuongKG]
+    P --> Q([Kết thúc])
+```
+
+---
+
+### 6. Deployment Diagram — Docker Services
+
+```mermaid
+flowchart TB
+    subgraph Docker["🐳 Docker Compose"]
+        subgraph GW["nginx:alpine — Port 80"]
+            Nginx["Nginx Reverse Proxy\ndefault.conf"]
+        end
+
+        subgraph FE["myproject-frontend — Port 5173"]
+            React["React + Vite\nnpm run dev"]
+        end
+
+        subgraph BE["myproject-backend — Port 8000"]
+            FastAPI2["FastAPI\nuvicorn app.main:app"]
+            AChat["ai_chat.py"]
+            GQuery["graph_query.py"]
+        end
+
+        subgraph DB["neo4j:5.16.0 — Port 7474/7687"]
+            Neo4jDB["Neo4j Graph DB\nLabel: TieuDuongKG\n39 triples"]
+        end
+    end
+
+    subgraph External["☁️ External APIs"]
+        Groq["Groq Cloud\nLlama-3.3-70B\nLlama-4 Maverick"]
+        Jina["Jina AI\njina-embeddings-v3"]
+    end
+
+    Browser["🌐 Browser"] -->|Port 80| Nginx
+    Nginx -->|/| React
+    Nginx -->|/api/*| FastAPI2
+    FastAPI2 --> AChat
+    FastAPI2 --> GQuery
+    GQuery -->|bolt://7687| Neo4jDB
+    AChat -->|HTTPS| Groq
+    GQuery -.->|KG Volume| Neo4jDB
+```
+
