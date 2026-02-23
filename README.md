@@ -68,6 +68,10 @@ Các nghiên cứu gần đây cho thấy LLM có thể thực hiện IE chất 
 
 Framework EDC hoạt động theo pipeline 3 pha tuần tự:
 
+![EDC Framework — Quy trình 3 Bước Xây dựng Đồ thị Tri thức với LLM](docs/edc_framework_vi.png)
+
+> *Hình 1.1: Tổng quan framework EDC (Extract–Define–Canonicalize) ứng dụng LLM để tự động xây dựng Knowledge Graph từ văn bản y khoa phi cấu trúc.*
+
 ```
 ┌──────────────────────────────────────────────────────────────────┐
 │                      VĂN BẢN Y KHOA ĐẦU VÀO                     │
