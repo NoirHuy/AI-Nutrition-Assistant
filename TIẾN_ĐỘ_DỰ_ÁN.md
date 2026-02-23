@@ -128,3 +128,146 @@
 ---
 
 *File này cập nhật thủ công theo tiến độ thực tế của dự án.*
+
+---
+
+## 🔍 PHÂN TÍCH HỆ THỐNG
+
+### 1. Kiến Trúc Tổng Thể
+
+Hệ thống được thiết kế theo mô hình **RAG (Retrieval-Augmented Generation)** kết hợp với **Knowledge Graph**:
+
+```
+Người dùng
+    │ (câu hỏi / ảnh món ăn)
+    ▼
+Frontend (React) ──► Nginx (Port 80) ──► Backend (FastAPI)
+                                               │
+                          ┌────────────────────┼─────────────────────┐
+                          ▼                    ▼                     ▼
+                    Neo4j KG           Semantic Mapping          Groq LLM
+                 (TieuDuongKG)      (LLM ánh xạ node)       (Tạo lời khuyên)
+                          │                    │
+                          └────────────────────┘
+                                    │
+                              KG Data Context
+                                    │
+                                    ▼
+                             Groq LLM (llama-3.3-70b)
+                             → Format + Generate Advice
+                                    │
+                                    ▼
+                              Kết quả trả về
+```
+
+---
+
+### 2. Luồng Xử Lý Chi Tiết
+
+#### 2.1. Chat API (`/api/chat`)
+
+```
+Input: {question: "bánh mì", disease: "Tiểu đường"}
+  │
+  ├─► [B1] Query Neo4j trực tiếp
+  │     MATCH (n:TieuDuongKG) WHERE name CONTAINS "bánh mì"
+  │
+  ├─► [B2] Nếu không tìm thấy → Semantic Mapping
+  │     LLM: "bánh mì" → node nào trong KG? → ["tinh_bột_tinh_luyện"]
+  │     Query lại Neo4j với node đã ánh xạ
+  │
+  ├─► [B3] Lấy dữ liệu bệnh
+  │     MATCH (a)-[r {relation: "làm trầm trọng"}]->(b) WHERE b.name CONTAINS "tiểu đường"
+  │
+  └─► [B4] LLM tạo lời khuyên
+        - Input: KG triples + bệnh lý + tên món
+        - Output: Markdown (tên → lời khuyên → KG data)
+```
+
+#### 2.2. Vision API (`/api/vision`)
+
+```
+Input: {image_base64: "...", disease: "Tiểu đường"}
+  │
+  ├─► [B1] Llama-4 Maverick nhận diện ảnh
+  │     → "Phở bò"
+  │
+  └─► [B2] Gọi lại luồng Chat API với tên món vừa nhận diện
+```
+
+---
+
+### 3. Phân Tích Từng Thành Phần
+
+#### 3.1. Knowledge Graph (Neo4j)
+
+| Thuộc tính | Hiện tại | Mục tiêu |
+|------------|---------|---------|
+| Số bệnh lý | 1 (Tiểu đường) | 10 bệnh lý |
+| Số triples | 39 | 500+ |
+| Ngôn ngữ | Tiếng Việt + Anh | Tiếng Việt (chính) |
+| Loại quan hệ | 15 kiểu | 15 kiểu (giữ nguyên) |
+| Food nodes | Chưa có | 100+ món Việt Nam |
+
+**Điểm mạnh:**
+- Schema rõ ràng, 15 quan hệ có nghĩa y tế chính xác
+- Dữ liệu được trích xuất từ tài liệu y khoa (không phải tự bịa)
+- Tách biệt KG tiếng Anh và tiếng Việt bằng label
+
+**Điểm yếu:**
+- Số lượng triples còn ít (39), chưa đủ phủ nhiều câu hỏi
+- Chưa có Food nodes → không tư vấn được theo món ăn cụ thể
+
+#### 3.2. Semantic Mapping
+
+| Tình huống | Xử lý |
+|-----------|-------|
+| Query khớp trực tiếp (`tiểu_đường`) | Query Neo4j ngay |
+| Query gần đúng (`đường huyết`) | `toLower() CONTAINS` match |
+| Query khác tầm trừu tượng (`nước ngọt có ga`) | LLM map → `đồ_uống_có_đường` → Neo4j |
+| Hoàn toàn ngoài KG | Thông báo rõ, không hallucinate |
+
+**Độ trễ thêm từ Semantic Mapping:** ~1-2 giây (1 lần gọi LLM thêm)
+
+#### 3.3. Backend API
+
+| Endpoint | Latency ước tính | Bottleneck |
+|----------|-----------------|------------|
+| `/api/chat` (có KG data) | ~2-3s | Groq API |
+| `/api/chat` (cần mapping) | ~4-5s | 2 lần gọi LLM |
+| `/api/vision` | ~5-7s | Vision model + chat |
+
+---
+
+### 4. So Sánh Hướng Tiếp Cận
+
+| Tiêu chí | Chỉ dùng LLM | KG + LLM (hiện tại) |
+|----------|-------------|---------------------|
+| Độ tin cậy | ❌ Có thể hallucinate | ✅ Grounded trong KG |
+| Phủ rộng câu hỏi | ✅ Rộng | ⚠️ Giới hạn theo KG |
+| Giải thích nguồn gốc | ❌ Không rõ | ✅ Hiện node + quan hệ |
+| Chi phí API | Thấp hơn | Cao hơn (nhiều lần gọi) |
+| Cập nhật tri thức | Khó | Dễ (thêm triples vào Neo4j) |
+
+---
+
+### 5. Điểm Cần Cải Thiện
+
+| Ưu tiên | Vấn đề | Giải pháp đề xuất |
+|---------|--------|-------------------|
+| 🔴 Cao | KG quá ít triples (39) | Thêm text → chạy pipeline EDC |
+| 🔴 Cao | Thiếu Food nodes trong KG | Import `food_data.xlsx` vào Neo4j |
+| 🟡 Trung bình | Semantic Mapping chậm | Cache kết quả mapping |
+| 🟡 Trung bình | Không có fallback khi Groq rate limit | Retry logic + timeout |
+| 🟢 Thấp | Frontend chưa có loading indicator | Thêm spinner cho Vision API |
+
+---
+
+### 6. Rủi Ro Dự Án
+
+| Rủi ro | Mức độ | Giảm thiểu |
+|--------|--------|-----------|
+| Groq API rate limit | Trung bình | Có thể dùng key khác hoặc thêm delay |
+| KG triples không đủ phủ → UX kém | Cao | Ưu tiên mở rộng KG |
+| Semantic mapping sai → tư vấn sai | Trung bình | Hiển thị node được ánh xạ để user kiểm tra |
+| Docker container crash (Neo4j) | Thấp | Volume mount đã được cấu hình |
