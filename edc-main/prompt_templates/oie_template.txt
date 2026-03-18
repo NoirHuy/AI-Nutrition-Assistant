@@ -1,5 +1,12 @@
 Your task is to transform the given text into a semantic graph in the form of a list of triples. The triples must be in the form of [Entity1, Relationship, Entity2]. In your answer, please strictly only include the triples and do not include any explanation or apologies.
 
+MANDATORY RULES:
+1. Entity names must be clean concept names ONLY. Never embed quantities, numbers, or measurement units (e.g., "100g", "2.5mg", "346 kcal") into entity names.
+2. Relation direction must always be: [Food/Nutrient/Substance] → [relation] → [Disease/Condition/Nutrient]. Never invert so that a nutrient or condition points to a food with 'chứa', 'giàu', 'contains', or 'rich_in'.
+3. The Object of 'chứa'/'giàu'/'contains'/'rich_in' must be a nutrient NAME (e.g., "protein"), never a numeric value (e.g., "8.6g protein").
+4. Do NOT produce near-duplicate relations for the same entity pair (e.g., do not use both 'cần hạn chế ở' and 'chống chỉ định với' for the same food-disease pair).
+5. Focus ONLY on medical, nutritional, and dietary relationships. Ignore any temporal, geographical, personal, or historical context.
+
 Here are some examples:
 {few_shot_examples}
 

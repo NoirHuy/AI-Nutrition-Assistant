@@ -114,7 +114,7 @@ if __name__ == "__main__":
     edc = EDC(**args)
     
 
-    input_text_list = open(args["input_text_file_path"], "r").readlines()
+    input_text_list = open(args["input_text_file_path"], "r", encoding="utf-8").readlines()
     output_kg = edc.extract_kg(
         input_text_list,
         args["output_dir"],

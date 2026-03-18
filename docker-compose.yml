@@ -26,13 +26,13 @@ services:
       - NEO4J_USER=neo4j
       - NEO4J_PASSWORD=password
       # 👇 ĐIỀN KEY CỦA BẠN VÀO ĐÂY
-      - GROQ_API_KEY=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
+      - GROQ_API_KEY=${GROQ_API_KEY}
     depends_on:
       - neo4j
 
   # 3. Frontend (Cấu hình giữ nguyên tên folder cũ)
   frontend:
-    build: ./frontend-diet  # 👈 Trỏ vào thư mục frontend-diet
+    build: ./frontend-diet # 👈 Trỏ vào thư mục frontend-diet
     container_name: nutrition_frontend
     ports:
       - "5173:5173"

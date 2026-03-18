@@ -101,10 +101,13 @@ class EDC:
         self.enrich_schema = edc_configuration["enrich_schema"]
 
         if self.initial_schema_path is not None:
-            reader = csv.reader(open(self.initial_schema_path, "r"))
+            reader = csv.reader(open(self.initial_schema_path, "r", encoding="utf-8"))
             self.schema = {}
             for row in reader:
-                relation, relation_definition = row
+                if len(row) < 2:
+                    continue
+                relation = row[0]
+                relation_definition = ",".join(row[1:])  # rejoin in case definition contains commas
                 self.schema[relation] = relation_definition
         else:
             self.schema = {}
@@ -147,8 +150,8 @@ class EDC:
         if previous_extracted_triplets_list is not None:
             # Refined OIE
             logger.info("Running Refined OIE...")
-            oie_refinement_prompt_template_str = open(self.oie_r_prompt_template_file_path).read()
-            oie_refinement_few_shot_examples_str = open(self.oie_r_few_shot_example_file_path).read()
+            oie_refinement_prompt_template_str = open(self.oie_r_prompt_template_file_path, encoding="utf-8").read()
+            oie_refinement_few_shot_examples_str = open(self.oie_r_few_shot_example_file_path, encoding="utf-8").read()
 
             logger.info("Putting together the refinement hint...")
             entity_hint_list, relation_hint_list = self.construct_refinement_hint(
@@ -173,8 +176,8 @@ class EDC:
             entity_hint_list = ["" for _ in input_text_list]
             relation_hint_list = ["" for _ in input_text_list]
             logger.info("Running OIE...")
-            oie_few_shot_examples_str = open(self.oie_few_shot_example_file_path).read()
-            oie_few_shot_prompt_template_str = open(self.oie_prompt_template_file_path).read()
+            oie_few_shot_examples_str = open(self.oie_few_shot_example_file_path, encoding="utf-8").read()
+            oie_few_shot_prompt_template_str = open(self.oie_prompt_template_file_path, encoding="utf-8").read()
 
             for input_text in tqdm(input_text_list):
                 oie_triples = extractor.extract(input_text, oie_few_shot_examples_str, oie_few_shot_prompt_template_str)
@@ -233,8 +236,8 @@ class EDC:
         else:
             schema_definer = SchemaDefiner(openai_model=self.sd_llm_name)
 
-        schema_definition_few_shot_prompt_template_str = open(self.sd_template_file_path).read()
-        schema_definition_few_shot_examples_str = open(self.sd_few_shot_example_file_path).read()
+        schema_definition_few_shot_prompt_template_str = open(self.sd_template_file_path, encoding="utf-8").read()
+        schema_definition_few_shot_examples_str = open(self.sd_few_shot_example_file_path, encoding="utf-8").read()
         schema_definition_dict_list = []
 
         logger.info("Running Schema Definition...")
@@ -267,7 +270,7 @@ class EDC:
         )
         logger.info("Running Schema Canonicalization...")
 
-        sc_verify_prompt_template_str = open(self.sc_template_file_path).read()
+        sc_verify_prompt_template_str = open(self.sc_template_file_path, encoding="utf-8").read()
 
         # if self.sc_embedder_name not in self.loaded_model_dict:
         #     logger.info(f"Loading model {self.sc_embedder_name}.")
@@ -338,10 +341,10 @@ class EDC:
         relation_top_k=10,
         free_model=False,
     ):
-        entity_extraction_few_shot_examples_str = open(self.ee_few_shot_example_file_path).read()
-        entity_extraction_prompt_template_str = open(self.ee_template_file_path).read()
+        entity_extraction_few_shot_examples_str = open(self.ee_few_shot_example_file_path, encoding="utf-8").read()
+        entity_extraction_prompt_template_str = open(self.ee_template_file_path, encoding="utf-8").read()
 
-        entity_merging_prompt_template_str = open(self.em_template_file_path).read()
+        entity_merging_prompt_template_str = open(self.em_template_file_path, encoding="utf-8").read()
 
         entity_hint_list = []
         relation_hint_list = []
@@ -551,10 +554,10 @@ class EDC:
                     "schema_canonicalizaiton": canon_triplets_list[idx],
                 }
                 json_results_list.append(result_json)
-            result_at_each_stage_file = open(f"{iteration_result_dir}/result_at_each_stage.json", "w")
-            json.dump(json_results_list, result_at_each_stage_file, indent=4)
+            result_at_each_stage_file = open(f"{iteration_result_dir}/result_at_each_stage.json", "w", encoding="utf-8")
+            json.dump(json_results_list, result_at_each_stage_file, indent=4, ensure_ascii=False)
 
-            final_result_file = open(f"{iteration_result_dir}/canon_kg.txt", "w")
+            final_result_file = open(f"{iteration_result_dir}/canon_kg.txt", "w", encoding="utf-8")
             for idx, canon_triplets in enumerate(non_null_triplets_list):
                 final_result_file.write(str(canon_triplets))
                 if idx != len(canon_triplets_list) - 1:
