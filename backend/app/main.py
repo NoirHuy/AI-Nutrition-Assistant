@@ -28,9 +28,13 @@ def read_root():
 @app.post("/api/chat")
 async def chat_endpoint(request: ChatRequest):
     response = generate_response(request.question, request.disease)
-    return {"bot_response": response}
+    if isinstance(response, str):
+        return {"bot_response": response, "nutrition": None}
+    return response
 
 @app.post("/api/vision")
 async def vision_endpoint(request: VisionRequest):
     response = analyze_image_diet(request.image_base64, request.disease)
-    return {"bot_response": response}
+    if isinstance(response, str):
+        return {"bot_response": response, "nutrition": None}
+    return response

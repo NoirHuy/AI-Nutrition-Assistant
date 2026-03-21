@@ -1,201 +1,240 @@
-# CHƯƠNG 1: NGHIÊN CỨU TỔNG QUAN VỀ DỰ ÁN
+# 🥗 Xây dựng Đồ thị Tri thức Dinh dưỡng Bệnh nhân
 
-## 1.1. Giới Thiệu Vấn Đề
+> **Đồ án 2 – HK2 (2025–2026)** | Tác giả: Lê Quang Huy – MSSV: 223571
 
-Trong bối cảnh y học cá nhân hóa (personalized medicine) ngày càng phát triển, nhu cầu xây dựng các hệ thống tư vấn dinh dưỡng dựa trên hồ sơ bệnh lý cụ thể của từng cá nhân trở nên cấp thiết hơn bao giờ hết. Các rối loạn chuyển hóa như tiểu đường type 2, tăng huyết áp, bệnh thận mãn tính, hay các bệnh lý liên quan đến dinh dưỡng như thiếu máu thiếu sắt, loãng xương đều đòi hỏi chế độ dinh dưỡng đặc thù và được khuyến nghị bởi các hướng dẫn lâm sàng quốc tế.
-
-Tuy nhiên, tri thức dinh dưỡng-bệnh lý hiện nay tồn tại dưới dạng văn bản phi cấu trúc (unstructured text) trong các bài báo khoa học, chỉ dẫn lâm sàng và sách giáo khoa y khoa, gây khó khăn cho việc tích hợp vào các hệ thống hỗ trợ ra quyết định (Clinical Decision Support Systems). **Đồ thị tri thức (Knowledge Graph — KG)** là một phương pháp biểu diễn tri thức có cấu trúc hiệu quả, cho phép lưu trữ và truy vấn các mối quan hệ phức tạp giữa thực thể (entity) như thực phẩm, dưỡng chất và bệnh lý.
-
-**Mục tiêu của dự án** là xây dựng một đồ thị tri thức dinh dưỡng theo bệnh lý cá nhân bằng cách tự động trích xuất tri thức từ các tài liệu y khoa sử dụng các mô hình ngôn ngữ lớn (Large Language Models — LLMs), cụ thể thông qua framework **EDC (Extract–Define–Canonicalize)**.
+[![Python](https://img.shields.io/badge/Python-3.11-blue?logo=python)](https://python.org)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.110-009688?logo=fastapi)](https://fastapi.tiangolo.com)
+[![Neo4j](https://img.shields.io/badge/Neo4j-5.16-008CC1?logo=neo4j)](https://neo4j.com)
+[![React](https://img.shields.io/badge/React-18-61DAFB?logo=react)](https://reactjs.org)
+[![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker)](https://docker.com)
+[![Groq](https://img.shields.io/badge/Groq-Llama_3.3_70B-FF6B35)](https://groq.com)
 
 ---
 
-## 1.2. Các Khái Niệm Cơ Bản
+## 📋 Giới thiệu
 
-### 1.2.1. Đồ Thị Tri Thức (Knowledge Graph)
+**Đồ án "Xây dựng đồ thị tri thức dinh dưỡng bệnh nhân"** là hệ thống tư vấn dinh dưỡng thông minh sử dụng **Knowledge Graph (Đồ thị Tri thức)** và kiến trúc **GraphRAG** để cung cấp lời khuyên dinh dưỡng an toàn, chính xác cho bệnh nhân mắc các bệnh mãn tính.
 
-Đồ thị tri thức là một cơ sở tri thức biểu diễn thông tin dưới dạng các bộ ba: **(Subject, Relation, Object)**, còn gọi là **bộ ba RDF (Resource Description Framework)**. Ví dụ:
+### Tính năng nổi bật
+
+| Tính năng | Mô tả |
+|---|---|
+| 🔍 **Tra cứu dinh dưỡng** | Nhập tên món ăn → Nhận ngay 16 chỉ số vi chất + lời khuyên y khoa |
+| 📸 **Nhận diện ảnh** | Chụp/upload ảnh món ăn → AI tự nhận diện → Tư vấn (Accuracy 86%) |
+| 🧠 **GraphRAG** | Trả lời được gò chặt trong dữ liệu thực tế – **không bao giờ bịa đặt** |
+| 🛡️ **Circuit Breaker** | Tự động chặn khi món ăn không có trong CSDL – Zero Hallucination |
+| 🗣️ **Tiếng Việt** | Hiểu từ lóng, từ địa phương (VD: "trái thơm" → "dứa") |
+
+### Nhóm bệnh hỗ trợ
+
+🩸 **Tiểu đường** &nbsp;|&nbsp; 💊 **Tăng huyết áp** &nbsp;|&nbsp; 🫘 **Suy thận** &nbsp;|&nbsp; ⚖️ **Béo phì**
+
+---
+
+## 🎬 Demo Hệ thống
+
+### Video Demo Hoạt Động Của Hệ Thống
+
+*(Nhấn trực tiếp vào ảnh bên dưới để xem video `demo.mp4` toàn cảnh hệ thống)*
+
+[![Xem Video Demo](demo.png)](demo.mp4)
+
+### Giao diện Chatbot
+
+![Demo Chatbot](demo.png)
+
+### Màn hình nhận diện ảnh (Vision AI)
+
+![Vision AI Demo](docs/edc_framework_vi.png)
+
+---
+
+## 🏗️ Kiến trúc Hệ thống
 
 ```
-(Vitamin D, phòng ngừa, Loãng xương)
-(Natri, làm trầm trọng, Tăng huyết áp)
-(Sắt, nguồn thực phẩm, Thịt đỏ)
+┌──────────────────────────────────────────────────────────────┐
+│                        NGƯỜI DÙNG                            │
+│                    (Trình duyệt Web)                         │
+└───────────────────┬──────────────────────────────────────────┘
+                    │ HTTP :80
+          ┌─────────▼─────────┐
+          │   Nginx Gateway   │
+          └────┬─────────┬────┘
+               │         │
+       ┌───────▼───┐  ┌──▼──────────┐
+       │  React 18 │  │  FastAPI    │
+       │  Frontend │  │  Backend    │ ← Python 3.11
+       └───────────┘  └──┬──────┬───┘
+                         │      │
+              ┌──────────▼┐   ┌─▼──────────┐
+              │  Neo4j KG │   │  Groq API  │
+              │ (Graph DB)│   │ Llama 3.3  │
+              └───────────┘   └─────────── ┘
+                                     │
+                              ┌──────▼──────┐
+                              │  Jina AI    │
+                              │ Embeddings  │
+                              └─────────────┘
 ```
 
-Các đồ thị tri thức nổi tiếng như **Wikidata**, **DBpedia**, và **UMLS** (Unified Medical Language System) đã được ứng dụng rộng rãi trong y sinh học. Tuy nhiên, việc xây dựng KG cho domain dinh dưỡng-bệnh lý chuyên biệt vẫn còn rất hạn chế.
-
-### 1.2.2. Mô Hình Ngôn Ngữ Lớn (LLM)
-
-Các mô hình ngôn ngữ lớn như **Llama-3**, **GPT-4**, **Mistral** đã đạt được khả năng hiểu và sinh văn bản gần như người thật. Trong bối cảnh Information Extraction (IE), LLM có thể được sử dụng để:
-
-- Trích xuất bộ ba quan hệ từ văn bản phi cấu trúc (**OIE — Open Information Extraction**)
-- Định nghĩa ngữ nghĩa của các quan hệ (**Schema Definition**)
-- Ánh xạ qua schema chuẩn (**Schema Canonicalization**)
-
-### 1.2.3. Embedding và Tương Đồng Ngữ Nghĩa
-
-**Embedding** là quá trình chuyển đổi văn bản thành vector số trong không gian đa chiều. Các vector gần nhau trong không gian này có nghĩa ngữ nghĩa tương đồng. Trong dự án này, **Jina Embeddings v3** được sử dụng để tính toán độ tương đồng ngữ nghĩa giữa các quan hệ trích xuất được và các quan hệ trong schema chuẩn.
-
----
-
-## 1.3. Tổng Quan Các Công Trình Liên Quan
-
-### 1.3.1. Hướng Tiếp Cận Truyền Thống
-
-Trước khi LLM phổ biến, việc xây dựng KG từ văn bản y sinh học dựa chủ yếu vào:
-
-| Phương pháp | Hạn chế |
-|-------------|---------|
-| **Rule-based NLP** (Regular Expression, POS Tagging) | Cần nhiều công sức viết rules; không tổng quát hóa tốt |
-| **Supervised ML** (SVM, BiLSTM) | Cần dữ liệu annotated lớn; tốn chi phí gán nhãn |
-| **OpenIE truyền thống** (Stanford OpenIE, ReVerb) | Trích xuất quan hệ thô, thiếu ngữ nghĩa; không theo schema |
-
-### 1.3.2. Hướng Tiếp Cận Dựa Trên LLM
-
-Các nghiên cứu gần đây cho thấy LLM có thể thực hiện IE chất lượng cao với **zero-shot hoặc few-shot prompting**, không cần dữ liệu annotated:
-
-- **GPT-NER** (Wang et al., 2023): Sử dụng ChatGPT để nhận dạng thực thể y sinh học
-- **PubMedBERT + Relation Extraction**: Fine-tune BERT trên dữ liệu y sinh học cho phân loại quan hệ
-- **ChatIE** (Wei et al., 2023): Chuyển đổi IE thành bài toán hội thoại với LLM
-
-### 1.3.3. EDC Framework
-
-**EDC (Extract–Define–Canonicalize)** được giới thiệu bởi Guo et al. (2023) là framework xây dựng KG theo hướng **schema-guided** — tức là có một schema quan hệ đích định sẵn. EDC giải quyết thách thức quan trọng: làm thế nào để ánh xạ các quan hệ trích xuất tự do sang schema chuẩn một cách ngữ nghĩa chính xác.
-
----
-
-## 1.4. Kiến Trúc Hệ Thống EDC
-
-Framework EDC hoạt động theo pipeline 3 pha tuần tự:
-
-![EDC Framework — Quy trình 3 Bước Xây dựng Đồ thị Tri thức với LLM](docs/edc_framework_vi.png)
-
-> *Hình 1.1: Tổng quan framework EDC (Extract–Define–Canonicalize) ứng dụng LLM để tự động xây dựng Knowledge Graph từ văn bản y khoa phi cấu trúc.*
+### Pipeline Xây dựng Knowledge Graph (EDC Framework)
 
 ```
-┌──────────────────────────────────────────────────────────────────┐
-│                      VĂN BẢN Y KHOA ĐẦU VÀO                     │
-│  "Bệnh nhân tiểu đường type 2 nên hạn chế carbohydrate tinh luyện"│
-└──────────────────────────────┬───────────────────────────────────┘
-                               │
-                    ┌──────────▼──────────┐
-                    │   PHASE 1: OIE      │ ← LLM (Groq: llama-3.3-70b)
-                    │ Open Info Extract   │
-                    │                     │
-                    │  Subject  Rel  Obj  │
-                    │ (refined_carbs) →   │
-                    │  aggravates →       │
-                    │ (type2_diabetes)    │
-                    └──────────┬──────────┘
-                               │
-                    ┌──────────▼──────────┐
-                    │   PHASE 2: SD       │ ← LLM (Groq: llama-3.3-70b)
-                    │ Schema Definition   │
-                    │                     │
-                    │ "aggravates":       │
-                    │  Subject làm trầm   │
-                    │  trọng thêm Object  │
-                    └──────────┬──────────┘
-                               │
-                    ┌──────────▼──────────┐
-                    │   PHASE 3: SC       │ ← Embedder: Jina v3
-                    │ Schema Canonical.   │   + LLM verify (Groq)
-                    │                     │
-                    │ "aggravates" →      │
-                    │   map to schema →   │
-                    │   "aggravates"      │
-                    └──────────┬──────────┘
-                               │
-               ┌───────────────▼────────────────┐
-               │   KNOWLEDGE GRAPH ĐẦU RA       │
-               │ (refined_carbs, aggravates,     │
-               │   type_2_diabetes)              │
-               └────────────────────────────────┘
+Văn bản y khoa (.txt)
+        │
+        ▼
+ [Phase 1: OIE]     ← Llama 3.3 trích xuất bộ ba (S, R, O) thô
+        │
+        ▼
+ [Phase 2: SD]      ← Llama 3.3 định nghĩa ngữ nghĩa từng quan hệ
+        │
+        ▼
+ [Phase 3: SC]      ← Jina Embeddings v3 chuẩn hóa về Schema chuẩn
+        │
+        ▼
+ [Deduplication]    ← Cosine Similarity (ngưỡng 0.90)
+        │
+        ▼
+ [Neo4j Import]     ← MERGE Node (Food, Disease, Nutrient, Other)
+        │
+        ▼
+  Knowledge Graph
+  500+ thực phẩm, 1000+ Triple quan hệ y khoa
 ```
 
-### Phase 1 — OIE (Open Information Extraction)
-LLM được cung cấp văn bản đầu vào và các few-shot examples, sau đó sinh ra danh sách bộ ba `(Subject, Relation, Object)` dạng thô. Không bị ràng buộc bởi schema — cho phép phát hiện mọi quan hệ có trong văn bản.
+---
 
-### Phase 2 — SD (Schema Definition)
-LLM định nghĩa ngữ nghĩa chính xác cho từng quan hệ đã trích xuất dựa trên ngữ cảnh văn bản gốc, giúp phân biệt các quan hệ có từ giống nhau nhưng nghĩa khác.
+## 🛠️ Công nghệ sử dụng
 
-### Phase 3 — SC (Schema Canonicalization)
-1. **Embedding Search**: Jina Embeddings v3 tính độ tương đồng cosine giữa định nghĩa của quan hệ trích xuất và tất cả quan hệ trong schema đích → lấy top-K candidates
-2. **LLM Verify**: LLM kiểm tra và quyết định ánh xạ cuối cùng (hoặc loại bỏ nếu không phù hợp)
+| Lớp | Công nghệ | Mục đích |
+|---|---|---|
+| **Frontend** | React 18 + Vite | Giao diện chatbot, upload ảnh |
+| **Backend** | FastAPI (Async) | REST API, xử lý GraphRAG |
+| **Database** | Neo4j 5.16 (Graph DB) | Lưu trữ Đồ thị Tri thức |
+| **Gateway** | Nginx | Reverse proxy, routing |
+| **LLM (Chat)** | Llama 3.3 70B via Groq | Sinh lời khuyên y khoa |
+| **LLM (Vision)** | Llama 4 Scout 17B via Groq | Nhận diện ảnh món ăn |
+| **Embedding** | Jina Embeddings v3 | Schema Canonicalization |
+| **KGC** | EDC Framework | Tự động trích xuất tri thức |
+| **Container** | Docker Compose | Deploy toàn bộ hệ thống |
 
 ---
 
-## 1.5. Cơ Sở Hạ Tầng Kỹ Thuật
+## ⚡ Cài đặt và Chạy
 
-### 1.5.1. Mô Hình Ngôn Ngữ — Groq API
+### Yêu cầu
 
-| Thông tin | Chi tiết |
-|-----------|---------|
-| **Nhà cung cấp** | Groq Cloud |
-| **Mô hình sử dụng** | `llama-3.3-70b-versatile` |
-| **Tham số** | 70 tỷ (70B parameters) |
-| **Đặc điểm** | Tốc độ inference cực nhanh (LPU hardware), tốc độ ~800 tokens/giây |
-| **Lý do chọn** | Miễn phí (rate-limited), không yêu cầu GPU cục bộ |
+- Docker Desktop đã cài đặt và đang chạy
+- Python 3.11+ (cho pipeline EDC offline)
+- API Keys: `GROQ_API_KEY`, `JINA_KEY`
 
-### 1.5.2. Mô Hình Embedding — Jina AI API
+### Bước 1: Clone và cấu hình
 
-| Thông tin | Chi tiết |
-|-----------|---------|
-| **Nhà cung cấp** | Jina AI |
-| **Mô hình sử dụng** | `jina-embeddings-v3` |
-| **Chiều vector** | 1024 chiều |
-| **Đặc điểm** | Hỗ trợ prompts cho domain cụ thể, state-of-the-art trên MTEB |
-| **Lý do chọn** | API miễn phí (1M tokens), không cần tải model local |
+```bash
+git clone <repo-url>
+cd MyProject
 
-### 1.5.3. Yêu Cầu Phần Cứng Sau Tối Ưu
+# Tạo file .env từ mẫu
+cp .env.example .env
+```
 
-| Thành phần | Yêu cầu |
-|-----------|---------|
-| **GPU/VRAM** | Không yêu cầu (100% API) |
-| **RAM** | ≥ 8 GB |
-| **CPU** | Bất kỳ (Intel/AMD) |
-| **Kết nối mạng** | Bắt buộc (gọi API) |
-| **Python** | 3.11+ |
+Điền các API key vào file `.env`:
 
----
+```env
+GROQ_API_KEY=gsk_xxxxxxxxxxxxxxxxxxxx
+JINA_KEY=jina_xxxxxxxxxxxxxxxxxxxx
+NEO4J_URI=bolt://nutrition_graph:7687
+NEO4J_USERNAME=neo4j
+NEO4J_PASSWORD=password
+```
 
-## 1.6. Schema Quan Hệ Dinh Dưỡng-Bệnh Lý
+### Bước 2: Khởi động hệ thống
 
-Dự án định nghĩa **15 loại quan hệ** để biểu diễn tri thức dinh dưỡng theo bệnh lý:
+```bash
+docker-compose up -d
+```
 
-| Quan hệ | Ý nghĩa |
-|---------|---------|
-| `treats` | Chất dinh dưỡng/thực phẩm dùng để điều trị bệnh |
-| `prevents` | Chất dinh dưỡng/thực phẩm giúp phòng ngừa bệnh |
-| `aggravates` | Thực phẩm/chất làm trầm trọng thêm bệnh lý |
-| `recommended_for` | Được khuyến nghị cho bệnh nhân mắc bệnh cụ thể |
-| `contraindicated_for` | Chống chỉ định với bệnh nhân mắc bệnh cụ thể |
-| `deficiency_causes` | Thiếu hụt dưỡng chất gây ra bệnh |
-| `enhances_absorption_of` | Tăng cường hấp thu dưỡng chất khác |
-| `restricts` | Bệnh nhân mắc bệnh cần hạn chế chất này |
-| `requires` | Bệnh nhân mắc bệnh cần bổ sung chất này |
-| `contains` | Thực phẩm chứa dưỡng chất |
-| `reduces` | Giảm mức độ/triệu chứng bệnh |
-| `associated_with` | Liên quan đến nguy cơ bệnh (tương quan) |
-| `daily_intake` | Liều lượng khuyến nghị hàng ngày |
-| `food_source` | Nguồn thực phẩm cung cấp dưỡng chất |
-| `symptom_of` | Biểu hiện lâm sàng của bệnh |
+Truy cập:
+- 🌐 **Giao diện web:** http://localhost
+- 📊 **Neo4j Browser:** http://localhost:7474
+- 📖 **API Docs (Swagger):** http://localhost:8000/docs
+
+### Bước 3: Import dữ liệu (lần đầu)
+
+```bash
+# Import 150+ món ăn từ Excel
+docker exec nutrition_backend python import_nutrition_kg.py
+
+# Hoặc chạy pipeline EDC để trích xuất từ văn bản mới
+cd edc-main
+python run.py --input your_document.txt --sc_embedder jina-embeddings-v3
+```
 
 ---
 
-## 1.7. Ứng Dụng Thực Tiễn
+## 📁 Cấu trúc thư mục
 
-Đồ thị tri thức dinh dưỡng-bệnh lý được xây dựng có thể làm nền tảng cho:
-
-1. **Hệ thống tư vấn dinh dưỡng cá nhân hóa**: Truy vấn "Bệnh nhân tiểu đường type 2 nên ăn gì?" → Graph traversal → Danh sách thực phẩm được khuyến nghị
-2. **Hệ thống cảnh báo tương tác dinh dưỡng-thuốc**: Phát hiện các thực phẩm chống chỉ định khi dùng thuốc
-3. **Hỗ trợ lập kế hoạch thực đơn bệnh viện**: Tự động hóa quy trình dietitian
-4. **Nền tảng giáo dục dinh dưỡng**: Trực quan hóa mối quan hệ dinh dưỡng-bệnh lý
+```
+MyProject/
+├── 📂 backend/                 # FastAPI Backend
+│   ├── app/
+│   │   ├── services/
+│   │   │   ├── ai_chat.py      # GraphRAG + Semantic Mapping + Circuit Breaker
+│   │   │   └── graph_query.py  # Truy vấn Neo4j
+│   │   ├── config.py           # Quản lý biến môi trường
+│   │   └── main.py             # Khởi động FastAPI
+│   └── Dockerfile
+├── 📂 frontend-diet/           # React 18 + Vite Frontend
+├── 📂 edc-main/                # EDC Framework (Knowledge Graph Construction)
+│   ├── edc/                    # Core modules: OIE, SD, SC
+│   ├── run.py                  # Điểm khởi chạy pipeline
+│   └── split_and_merge.py      # Chia nhỏ văn bản lớn
+├── 📂 nginx/                   # Cấu hình Nginx reverse proxy
+├── 📂 docs/                    # Tài liệu và ảnh demo
+├── 📂 baocao/                  # Báo cáo đồ án (PDF/DOCX)
+├── 📄 docker-compose.yml       # Docker Compose
+├── 📄 benchmark_latency.py     # Script đo hiệu năng API
+└── 📄 .env                     # Biến môi trường (không commit!)
+```
 
 ---
 
-## 1.8. Kết Luận Chương
+## 📊 Kết quả đánh giá
 
-Dự án "Xây dựng đồ thị tri thức dinh dưỡng theo bệnh lý cá nhân" áp dụng framework **EDC** kết hợp với API của **Groq** (Llama-3.3-70B) và **Jina AI** để tự động hóa quá trình trích xuất và cấu trúc hóa tri thức y khoa từ văn bản phi cấu trúc. Hướng tiếp cận này vượt qua các hạn chế về phần cứng của phương pháp dùng mô hình cục bộ, đồng thời tận dụng khả năng suy luận vượt trội của các LLM quy mô lớn để đảm bảo chất lượng trích xuất tri thức.
+| Tiêu chí | Kết quả |
+|---|---|
+| Vision AI Accuracy (100 ảnh) | **86%** (Món chính: 92.5%) |
+| Semantic Mapping Rate (100 truy vấn) | **88%** |
+| Circuit Breaker (chặn ảo giác) | **100%** |
+| Latency – Avg (Text Query) | **~1.4 giây** |
+| Latency – P95 (Text Query) | **~2.1 giây** |
 
-Framework đã được kiểm chứng chạy thành công trên 10 đoạn văn y khoa bao gồm các bệnh lý: tiểu đường, tăng huyết áp, bệnh thận mãn tính, thiếu máu, bệnh celiac, gout, loãng xương, gan nhiễm mỡ, bệnh tuyến giáp và phenylceton niệu, tạo ra đồ thị tri thức dinh dưỡng có cấu trúc với 15 loại quan hệ chuẩn hóa.
+---
+
+## 📚 Tài liệu tham khảo
+
+- Zhang, B. & Soh, H. (2024). *Extract, Define, Canonicalize: An LLM-based Framework for Knowledge Graph Construction.* EMNLP 2024. [arXiv:2404.03868](https://arxiv.org/abs/2404.03868)
+- Lewis, P. et al. (2020). *Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks.* NeurIPS.
+- Edge, D. et al. (2024). *From Local to Global: A Graph RAG Approach.* Microsoft Research.
+- Viện Dinh Dưỡng Quốc Gia. (2007). *Bảng Thành Phần Thực Phẩm Việt Nam.* NXB Y Học.
+
+---
+
+## 📄 Báo cáo đồ án
+
+| File | Mô tả |
+|---|---|
+| [`BaoCaoDoAn2_LeQuangHuy_223571.pdf`](baocao/BaoCaoDoAn2_LeQuangHuy_223571.pdf) | Báo cáo đồ án 2 – PDF |
+| [`BaoCaoDoAn2_LeQuangHuy_223571.docx`](baocao/BaoCaoDoAn2_LeQuangHuy_223571.docx) | Báo cáo đồ án 2 – DOCX |
+
+---
+
+## 👤 Tác giả
+
+**Lê Quang Huy** – MSSV: 223571  
+Đồ án 2 – Ngành Kỹ thuật Phần mềm  
+HK2, Năm học 2025–2026
+
+---
+
+> ⚠️ **Lưu ý bảo mật:** File `.env` chứa API keys nhạy cảm. Đảm bảo file này đã được thêm vào `.gitignore` trước khi push lên repository công khai.
