@@ -37,7 +37,7 @@
 
 *(Nhấn trực tiếp vào ảnh bên dưới để xem video `demo.mp4` toàn cảnh hệ thống)*
 
-[![Xem Video Demo](demo.png)](demo.mp4?raw=true)
+[![Xem Video Demo](demo.png)](https://raw.githubusercontent.com/NoirHuy/AI-Nutrition-Assistant/main/demo.mp4)
 
 ### Giao diện Chatbot
 
