@@ -38,7 +38,11 @@
 *(Nhấn trực tiếp vào ảnh bên dưới để xem video `demo.mp4` toàn cảnh hệ thống)*
 
 
-https://github.com/user-attachments/assets/ab734a01-bc60-471a-af03-2d6e5e4c5de0
+
+
+https://github.com/user-attachments/assets/2848866e-6234-44a8-9129-fac9b00cc0ea
+
+
 
 
 
@@ -241,4 +245,3 @@ HK2, Năm học 2025–2026
 
 ---
 
-> ⚠️ **Lưu ý bảo mật:** File `.env` chứa API keys nhạy cảm. Đảm bảo file này đã được thêm vào `.gitignore` trước khi push lên repository công khai.
