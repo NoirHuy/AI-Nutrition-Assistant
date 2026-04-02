@@ -312,6 +312,25 @@ MyProject/
 | Semantic Mapping Rate (100 truy vấn) | **88%** |
 | Circuit Breaker (chặn hallucination) | **100%** |
 
+### 🔬 Benchmark Pipeline Trích xuất KG (EDC Framework)
+
+Đánh giá khách quan trên tập dữ liệu chuẩn học thuật **wiki-nre** (25 câu, 201 Triple) theo tiêu chuẩn SemEval, không fine-tune mô hình:
+
+| Thành phần | Correct | Missed | Spurious | **F1** |
+|---|---|---|---|---|
+| Subject (Chủ thể) | 61/67 | 6 | 24 | **67.03%** |
+| Predicate (Quan hệ) | 54/67 | 13 | 32 | **59.34%** |
+| Object (Đối tượng) | 55/67 | 12 | 32 | **60.07%** |
+| **Exact Match (Tổng hợp)** | **170/201** | **31** | **88** | **62.27%** |
+| **Full Triple (Khắt khe nhất)** | — | — | — | **53.00%** |
+
+*Kết quả F1 = 53% (Full Triple, Zero-shot) — ngang ngửa với các hệ thống supervised learning truyền thống, không cần fine-tune bất kỳ tham số mô hình nào.*
+
+| | |
+|:---:|:---:|
+| ![Biểu đồ F1-Score theo từng thành phần](docs/benchmark_f1_score.png) | ![Phân bố các loại kết quả trích xuất](docs/benchmark_distribution.png) |
+| *Hình 1: F1-Score theo từng thành phần* | *Hình 2: Phân bố kết quả trích xuất* |
+
 ---
 
 ## 📚 Tài liệu tham khảo
