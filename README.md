@@ -13,51 +13,32 @@
 
 ## 📋 Giới thiệu
 
-**Đồ án "Xây dựng đồ thị tri thức dinh dưỡng bệnh nhân"** là hệ thống tư vấn dinh dưỡng thông minh sử dụng **Knowledge Graph (Đồ thị Tri thức)** và kiến trúc **GraphRAG** để cung cấp lời khuyên dinh dưỡng an toàn, chính xác cho bệnh nhân mắc các bệnh mãn tính.
+**Đồ án "Xây dựng đồ thị tri thức dinh dưỡng bệnh nhân"** nghiên cứu và xây dựng một hệ thống tự động trích xuất tri thức y khoa từ văn bản phi cấu trúc thành **Knowledge Graph (Đồ thị Tri thức)** có cấu trúc, kết hợp kiến trúc **GraphRAG** để cung cấp lời khuyên dinh dưỡng an toàn, có kiểm chứng cho bệnh nhân mắc các bệnh mãn tính.
 
-### Tính năng nổi bật
-
-| Tính năng | Mô tả |
-|---|---|
-| 🔍 **Tra cứu dinh dưỡng** | Nhập tên món ăn → Nhận ngay 16 chỉ số vi chất + lời khuyên y khoa |
-| 📸 **Nhận diện ảnh** | Chụp/upload ảnh món ăn → AI tự nhận diện → Tư vấn (Accuracy 86%) |
-| 🧠 **GraphRAG** | Trả lời được gò chặt trong dữ liệu thực tế – **không bao giờ bịa đặt** |
-| 🛡️ **Circuit Breaker** | Tự động chặn khi món ăn không có trong CSDL – Zero Hallucination |
-| 🗣️ **Tiếng Việt** | Hiểu từ lóng, từ địa phương (VD: "trái thơm" → "dứa") |
+> **Trọng tâm kỹ thuật:** Pipeline tự động xây dựng Knowledge Graph gồm 3 vấn đề cốt lõi:
+> 1. Thu thập và tiền xử lý dữ liệu y văn (Preprocessing + Coreference Resolution)
+> 2. Trích xuất thực thể và quan hệ bằng LLM (OIE + Few-shot Prompting)
+> 3. Xây dựng và chuẩn hóa đồ thị tri thức (EDC Framework + Semantic Deduplication)
 
 ### Nhóm bệnh hỗ trợ
 
 🩸 **Tiểu đường** &nbsp;|&nbsp; 💊 **Tăng huyết áp** &nbsp;|&nbsp; 🫘 **Suy thận** &nbsp;|&nbsp; ⚖️ **Béo phì**
 
+### Tính năng ứng dụng
+
+| Tính năng | Mô tả |
+|---|---|
+| 🔍 **Tra cứu dinh dưỡng** | Nhập tên món ăn → Nhận ngay 16 chỉ số vi chất + lời khuyên y khoa |
+| 📸 **Nhận diện ảnh** | Chụp/upload ảnh món ăn → Llama 4 Scout tự nhận diện → Tư vấn (Accuracy 86%) |
+| 🧠 **GraphRAG** | Trả lời được gò chặt trong dữ liệu thực tế – **không bao giờ bịa đặt** |
+| 🛡️ **Circuit Breaker** | Tự động chặn khi món ăn không có trong CSDL – Zero Hallucination |
+| 🗣️ **Tiếng Việt** | Hiểu từ lóng, từ địa phương (VD: "trái thơm" → "dứa") |
+
 ---
 
 ## 🎬 Demo Hệ thống
 
-### Video Demo Hoạt Động Của Hệ Thống
-
-*(Nhấn trực tiếp vào ảnh bên dưới để xem video `demo.mp4` toàn cảnh hệ thống)*
-
-
-
-
-
 https://github.com/user-attachments/assets/dd992a1f-8b68-4373-8f4e-ea7b1ab0ef8c
-
-
-
-
-
-
-
-
-
-### Giao diện Chatbot
-
-![Demo Chatbot](demo.png)
-
-### Màn hình nhận diện ảnh (Vision AI)
-
-![Vision AI Demo](docs/edc_framework_vi.png)
 
 ---
 
@@ -89,46 +70,132 @@ https://github.com/user-attachments/assets/dd992a1f-8b68-4373-8f4e-ea7b1ab0ef8c
                               └─────────────┘
 ```
 
-### Pipeline Xây dựng Knowledge Graph (EDC Framework)
+---
+
+## 🔬 Pipeline Xây dựng Knowledge Graph (Trọng tâm kỹ thuật)
+
+Đây là phần cốt lõi của đề tài — pipeline tự động chuyển đổi văn bản y khoa phi cấu trúc thành đồ thị tri thức có cấu trúc, gồm **2 giai đoạn tiền xử lý** và **3 pha EDC**:
+
+### Giai đoạn 1: Thu thập và Tiền xử lý Dữ liệu Y Văn
 
 ```
-Văn bản y khoa (.txt)
+Văn bản y khoa thô (*_raw.txt)
+        │
+        ▼  [preprocess_raw_data.py]
+   LLM Standardization          ← Llama 3.3 (temperature=0.1) chuyển bảng biểu
+   (10 Strict Rules)               và danh sách → văn xuôi prose chuẩn mực,
+                                   bảo toàn 100% số liệu định lượng (mg, %, g/ngày)
+        │
+        ▼  [preprocess_document.py]
+   ┌─── Clean & Sentence Split  ← Regex loại bỏ header/số trang, tách câu
+   │                               có bảo vệ số thập phân (0.8 g/kg → <DOT>)
+   │
+   ├─── Chunking (3 câu/chunk)  ← Gom câu thành các đoạn có ngữ nghĩa nhất quán
+   │
+   └─── Coreference Resolution  ← LLM (temperature=0.0) + Sliding Window
+                                   Thay "nó/điều này" → tên thực thể cụ thể
+                                   VD: "Điều này tốt cho tiểu đường"
+                                     → "Gạo lứt có chất xơ tốt cho tiểu đường"
         │
         ▼
- [Phase 1: OIE]     ← Llama 3.3 trích xuất bộ ba (S, R, O) thô
+   File chunked.txt (mỗi dòng = 1 chunk tự chứa đủ ngữ nghĩa)
+```
+
+### Giai đoạn 2: Trích xuất và Chuẩn hóa Tri thức (EDC Framework)
+
+```
+Chunk văn bản (3 câu đã qua Coreference Resolution)
+        │
+        ▼  PHA 1 — EXTRACT (Open Information Extraction)
+   LLM OIE                      ← Llama 3.3-70B + 5 Few-shot Examples
+   (Relation tự do)                Định nghĩa tên thực thể SẠCH, không kèm đơn vị
+        │
+        │  Ví dụ đầu ra:
+        │  (natri, "làm co mạch khiến tăng huyết áp", tăng huyết áp)
+        │  (natri, "cần hạn chế dưới 2300mg/ngày", bệnh nhân cao huyết áp)
+        │
+        ▼  PHA 2 — DEFINE (Schema Definition)
+   De-duplicate Relations        ← Thu thập tập quan hệ DUY NHẤT (tiết kiệm API)
+   LLM viết định nghĩa           ← Mỗi Relation thô → Định nghĩa ngữ nghĩa đầy đủ
+   ngữ nghĩa                        (đây là "cầu nối" để Pha 3 so sánh chính xác)
+        │
+        ▼  PHA 3 — CANONICALIZE (Schema Canonicalization)
+   ┌─── Bước 3a: Embedding       ← Jina Embeddings v3 vector hóa định nghĩa quan hệ
+   │    Retrieval                   → Cosine Similarity vs 12 nhãn Schema chuẩn
+   │                                → Chọn Top-5 ứng viên (tính toán nội bộ, không API)
+   │
+   └─── Bước 3b: LLM Verify     ← Trắc nghiệm multiple-choice (A/B/C/D/E/F)
+        (max_tokens=1)              LLM xác nhận nhãn Schema phù hợp nhất
+                                    Nếu F (None) → Triple bị loại bỏ
         │
         ▼
- [Phase 2: SD]      ← Llama 3.3 định nghĩa ngữ nghĩa từng quan hệ
+   Triple đã chuẩn hóa: (natri, "làm trầm trọng", tăng huyết áp) ✅
+```
+
+### Giai đoạn 3: Hậu xử lý và Import Neo4j
+
+```
+Tập Triple đã chuẩn hóa
+        │
+        ▼  Lớp 1: Rule-based Cleaning
+   Lọc 4 loại lỗi:              ← Triple trừu tượng, quan hệ đảo chiều,
+                                   tự tham chiếu, entity chứa ký tự rác
+        │
+        ▼  Lớp 2: Semantic Deduplication
+   Jina Embeddings v3            ← Vector hóa tên tất cả thực thể
+   + Cosine Similarity > 0.90      Gom nhóm thực thể đồng nghĩa:
+                                   "tiểu đường" / "đái tháo đường" → 1 Node
+                                   "tăng huyết áp" / "cao huyết áp" → 1 Node
+        │
+        ▼  Neo4j Import (MERGE strategy)
+   4 nhãn Node:  Food | Disease | Nutrient | Other
+   12 loại Quan hệ (Schema chuẩn):
+     ├─ làm trầm trọng       ├─ cần hạn chế ở      ├─ chống chỉ định với
+     ├─ được khuyến nghị cho  ├─ phòng ngừa          ├─ hỗ trợ
+     ├─ ảnh hưởng đường huyết ├─ giàu                ├─ ít
+     ├─ thiếu hụt gây ra     ├─ tương tác với       └─ là yếu tố nguy cơ của
         │
         ▼
- [Phase 3: SC]      ← Jina Embeddings v3 chuẩn hóa về Schema chuẩn
+   Knowledge Graph hoàn chỉnh:
+   ~800 Nodes | 1.200+ Triple quan hệ y khoa | 16 vi chất/thực phẩm
+```
+
+---
+
+## 🤖 Pipeline Tư vấn GraphRAG (Runtime)
+
+```
+Người dùng (Tên món / Ảnh + Bệnh lý)
         │
-        ▼
- [Deduplication]    ← Cosine Similarity (ngưỡng 0.90)
+        ▼ Vision AI (nếu có ảnh)     ← Llama 4 Scout 17B nhận diện tên món
         │
-        ▼
- [Neo4j Import]     ← MERGE Node (Food, Disease, Nutrient, Other)
+        ▼ Neo4j Exact Lookup          ← Cypher Query: tìm node Food + quan hệ bệnh lý
         │
-        ▼
-  Knowledge Graph
-  500+ thực phẩm, 1000+ Triple quan hệ y khoa
+        ▼ Semantic Mapping (Fallback) ← Llama 3.3 ánh xạ "trái thơm" → "dứa"
+        │
+        ▼ Circuit Breaker             ← Nếu không có dữ liệu → CHẶN, hiển thị cảnh báo
+        │
+        ▼ LLM Response Generation     ← Sinh lời khuyên tiếng Việt từ ngữ cảnh KG
+        │
+        └──► Lời khuyên y khoa có kiểm chứng + Biểu đồ 16 vi chất
 ```
 
 ---
 
 ## 🛠️ Công nghệ sử dụng
 
-| Lớp | Công nghệ | Mục đích |
-|---|---|---|
-| **Frontend** | React 18 + Vite | Giao diện chatbot, upload ảnh |
-| **Backend** | FastAPI (Async) | REST API, xử lý GraphRAG |
-| **Database** | Neo4j 5.16 (Graph DB) | Lưu trữ Đồ thị Tri thức |
-| **Gateway** | Nginx | Reverse proxy, routing |
-| **LLM (Chat)** | Llama 3.3 70B via Groq | Sinh lời khuyên y khoa |
-| **LLM (Vision)** | Llama 4 Scout 17B via Groq | Nhận diện ảnh món ăn |
-| **Embedding** | Jina Embeddings v3 | Schema Canonicalization |
-| **KGC** | EDC Framework | Tự động trích xuất tri thức |
-| **Container** | Docker Compose | Deploy toàn bộ hệ thống |
+| Lớp | Công nghệ | Phiên bản | Mục đích |
+|---|---|---|---|
+| **Frontend** | React + Vite | React 18 | Giao diện chatbot, upload ảnh, biểu đồ |
+| **Backend** | FastAPI + Python | 3.11 | REST API async, điều phối GraphRAG |
+| **Database** | Neo4j Graph DB | 5.16 | Lưu trữ Đồ thị Tri thức 12 quan hệ |
+| **Gateway** | Nginx | 1.29 | Reverse proxy, routing |
+| **LLM – Trích xuất KG** | Llama 3.3 via Groq | 70B-versatile | OIE, Schema Definition, Semantic Mapping |
+| **LLM – Vision** | Llama 4 Scout via Groq | 17B-16E | Nhận diện ảnh món ăn |
+| **LLM – Chuẩn hóa** | Llama 3.3 via Groq | 70B-versatile | Coreference Resolution, LLM Verify |
+| **Embedding** | Jina Embeddings v3 | Cloud API | Schema Canonicalization, Deduplication |
+| **KG Framework** | EDC Framework | Custom | Tự động trích xuất tri thức (3 pha) |
+| **Container** | Docker Compose | v3 | Đóng gói và triển khai toàn hệ thống |
 
 ---
 
@@ -136,7 +203,7 @@ Văn bản y khoa (.txt)
 
 ### Yêu cầu
 
-- Docker Desktop đã cài đặt và đang chạy
+- Docker Desktop (đang chạy)
 - Python 3.11+ (cho pipeline EDC offline)
 - API Keys: `GROQ_API_KEY`, `JINA_KEY`
 
@@ -174,12 +241,21 @@ Truy cập:
 ### Bước 3: Import dữ liệu (lần đầu)
 
 ```bash
-# Import 150+ món ăn từ Excel
+# Import 150+ món ăn từ Excel (16 vi chất/món)
 docker exec nutrition_backend python import_nutrition_kg.py
 
-# Hoặc chạy pipeline EDC để trích xuất từ văn bản mới
+# Hoặc chạy pipeline EDC để trích xuất từ tài liệu y khoa mới
 cd edc-main
-python run.py --input your_document.txt --sc_embedder jina-embeddings-v3
+
+# Bước tiền xử lý (nếu tài liệu thô có bảng biểu)
+python preprocess_raw_data.py --input_file your_raw.txt --output_file your.txt
+
+# Bước chunking + Coreference Resolution
+python preprocess_document.py --input_file your.txt --output_file your_chunked.txt \
+    --sentences_per_chunk 3 --context_window 1
+
+# Chạy EDC Framework (3 pha: Extract → Define → Canonicalize)
+python run.py --input your_chunked.txt --sc_embedder jina-embeddings-v3
 ```
 
 ---
@@ -192,43 +268,59 @@ MyProject/
 │   ├── app/
 │   │   ├── services/
 │   │   │   ├── ai_chat.py      # GraphRAG + Semantic Mapping + Circuit Breaker
-│   │   │   └── graph_query.py  # Truy vấn Neo4j
-│   │   ├── config.py           # Quản lý biến môi trường
-│   │   └── main.py             # Khởi động FastAPI
+│   │   │   └── graph_query.py  # Truy vấn Neo4j (Cypher)
+│   │   ├── config.py           # Quản lý biến môi trường (.env)
+│   │   └── main.py             # Khởi động FastAPI + CORS
 │   └── Dockerfile
 ├── 📂 frontend-diet/           # React 18 + Vite Frontend
-├── 📂 edc-main/                # EDC Framework (Knowledge Graph Construction)
-│   ├── edc/                    # Core modules: OIE, SD, SC
-│   ├── run.py                  # Điểm khởi chạy pipeline
-│   └── split_and_merge.py      # Chia nhỏ văn bản lớn
+├── 📂 edc-main/                # Pipeline Xây dựng Knowledge Graph
+│   ├── edc/                    # Core: extract.py | schema_definition.py | schema_canonicalization.py
+│   ├── few_shot_examples/      # 5 ví dụ mẫu OIE cho 5 nhóm bệnh lý
+│   ├── schemas/disease/        # disease_schema.csv (12 quan hệ chuẩn)
+│   ├── datasets/               # Văn bản y khoa thô và đã xử lý
+│   ├── preprocess_raw_data.py  # Bước 1: LLM chuẩn hóa bảng biểu → văn xuôi
+│   ├── preprocess_document.py  # Bước 2: Clean → Chunk → Coreference Resolution
+│   └── run.py                  # Khởi chạy pipeline EDC 3 pha
 ├── 📂 nginx/                   # Cấu hình Nginx reverse proxy
-├── 📂 docs/                    # Tài liệu và ảnh demo
 ├── 📂 baocao/                  # Báo cáo đồ án (PDF/DOCX)
-├── 📄 docker-compose.yml       # Docker Compose
-├── 📄 benchmark_latency.py     # Script đo hiệu năng API
-└── 📄 .env                     # Biến môi trường (không commit!)
+├── 📄 docker-compose.yml       # Định nghĩa 4 services
+├── 📄 benchmark_latency.py     # Script đo hiệu năng API (50 iterations)
+└── 📄 .env                     # ⚠️ Biến môi trường (KHÔNG commit lên GitHub!)
 ```
 
 ---
 
 ## 📊 Kết quả đánh giá
 
+### Hiệu năng hệ thống tư vấn (50 lần đo)
+
+| Bước xử lý | Trung bình | P95 |
+|---|---|---|
+| Truy vấn Neo4j (Cypher) | 48 ms | 72 ms |
+| Semantic Mapping (Groq LLM) | 310 ms | 520 ms |
+| Nhận diện ảnh – Vision AI | 890 ms | 1.350 ms |
+| Sinh lời khuyên – LLM Generation | 980 ms | 1.480 ms |
+| **End-to-End (toàn bộ quy trình)** | **5.410 ms\*** | 16.595 ms |
+
+> \* Thời gian trung bình cao do ảnh hưởng Rate Limit gói API Free của Groq. Trong điều kiện lý tưởng (không queue), thời gian phản hồi đạt 1.5–2 giây.
+
+### Độ chính xác các tính năng
+
 | Tiêu chí | Kết quả |
 |---|---|
-| Vision AI Accuracy (100 ảnh) | **86%** (Món chính: 92.5%) |
+| Vision AI Accuracy (100 ảnh) | **86%** (Món chính VN: 92.5%) |
 | Semantic Mapping Rate (100 truy vấn) | **88%** |
-| Circuit Breaker (chặn ảo giác) | **100%** |
-| Latency – Avg (Text Query) | **~1.4 giây** |
-| Latency – P95 (Text Query) | **~2.1 giây** |
+| Circuit Breaker (chặn hallucination) | **100%** |
 
 ---
 
 ## 📚 Tài liệu tham khảo
 
-- Zhang, B. & Soh, H. (2024). *Extract, Define, Canonicalize: An LLM-based Framework for Knowledge Graph Construction.* EMNLP 2024. [arXiv:2404.03868](https://arxiv.org/abs/2404.03868)
-- Lewis, P. et al. (2020). *Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks.* NeurIPS.
-- Edge, D. et al. (2024). *From Local to Global: A Graph RAG Approach.* Microsoft Research.
-- Viện Dinh Dưỡng Quốc Gia. (2007). *Bảng Thành Phần Thực Phẩm Việt Nam.* NXB Y Học.
+1. Zhang, B. & Soh, H. (2024). *Extract, Define, Canonicalize: An LLM-based Framework for Knowledge Graph Construction.* EMNLP 2024. [arXiv:2404.03868](https://arxiv.org/abs/2404.03868)
+2. Lewis, P. et al. (2020). *Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks.* NeurIPS.
+3. Edge, D. et al. (2024). *From Local to Global: A Graph RAG Approach.* Microsoft Research.
+4. Günther, M. et al. (2023). *Jina Embeddings v3: Multilingual Embeddings With Task LoRA.* [arXiv:2309.10604](https://arxiv.org/abs/2309.10604)
+5. Viện Dinh Dưỡng Quốc Gia. (2007). *Bảng Thành Phần Thực Phẩm Việt Nam.* NXB Y Học.
 
 ---
 
@@ -248,4 +340,3 @@ MyProject/
 HK2, Năm học 2025–2026
 
 ---
-
