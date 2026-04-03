@@ -38,7 +38,7 @@ function App() {
     setLoading(true);
     setResult(null);
 
-    let endpoint = 'http://localhost:8000/api/vision'; 
+    let endpoint = '/api/vision'; 
     let payload = { disease };
 
     try {
@@ -49,7 +49,7 @@ function App() {
       } 
       else if (type === 'text') {
         if (!foodText) throw new Error("Vui lòng nhập tên món ăn!");
-        endpoint = 'http://localhost:8000/api/chat'; 
+        endpoint = '/api/chat'; 
         payload.question = foodText;
       }
 
