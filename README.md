@@ -11,6 +11,20 @@
 
 ---
 
+## 🚀 Demo Live (Giáo viên / Hội đồng truy cập tại đây)
+
+| Dịch vụ | Đường link | Thông tin đăng nhập |
+|---|---|---|
+| 🌐 **Web App (Tư vấn Dinh dưỡng)** | [ainutritionassistant.noirhuy.id.vn](http://ainutritionassistant.noirhuy.id.vn) | *(không cần đăng nhập)* |
+| 🔬 **Neo4j Browser (Đồ thị Tri thức)** | [ainutritionassistant.noirhuy.id.vn:7474](http://ainutritionassistant.noirhuy.id.vn:7474) | Username: `neo4j` / Password: `password` |
+| 💻 **IP trực tiếp (dự phòng)** | [103.82.27.129](http://103.82.27.129) | — |
+
+> 💡 **Hướng dẫn nhanh cho Hội đồng:** Vào link Web App → Chọn bệnh (VD: *Tiểu đường*) → Nhập tên món ăn (VD: *cơm trắng*) → Nhấn **Phân tích** để xem lời khuyên dinh dưỡng từ AI.
+>
+> Để xem Đồ thị Tri thức trực quan, vào Neo4j Browser → chạy lệnh Cypher: `MATCH (n) RETURN n LIMIT 100`
+
+---
+
 ## 📋 Giới thiệu
 
 **Đồ án "Xây dựng đồ thị tri thức dinh dưỡng bệnh nhân"** nghiên cứu và xây dựng một hệ thống tự động trích xuất tri thức y khoa từ văn bản phi cấu trúc thành **Knowledge Graph (Đồ thị Tri thức)** có cấu trúc, kết hợp kiến trúc **GraphRAG** để cung cấp lời khuyên dinh dưỡng an toàn, có kiểm chứng cho bệnh nhân mắc các bệnh mãn tính.
