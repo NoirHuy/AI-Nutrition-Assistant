@@ -1,5 +1,6 @@
 # Bỏ qua thư viện nặng
 node_modules/
+.venv/
 __pycache__/
 *.pyc
 
