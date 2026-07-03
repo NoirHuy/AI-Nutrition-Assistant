@@ -374,8 +374,32 @@ Do not include any other text or markdown formatting.
         return [], extracted_terms
 
     # Stage 1c: Perform linking using LLM on the small candidate list
-    nodes_str = ", ".join(f'"{n}"' for n in candidate_list)
-    linking_prompt = f"""You are an expert clinical entity linker. Identify which entities from the provided "Knowledge Graph entities" list are mentioned or clearly implied in the "Clinical scenario".
+    # Auto-matching: If any candidate node ID or alias matches an extracted term exactly (case-insensitive), match it immediately!
+    auto_matched = set()
+    for term in extracted_terms:
+        term_str = term.get("term", "") if isinstance(term, dict) else str(term)
+        term_lower = term_str.lower().strip()
+        if not term_lower:
+            continue
+        for node_entry in kg_nodes:
+            node_id = node_entry["id"]
+            if node_id in candidate_list:
+                if node_id.lower().strip() == term_lower:
+                    auto_matched.add(node_id)
+                else:
+                    for alias in node_entry.get("aliases", []):
+                        if alias.lower().strip() == term_lower:
+                            auto_matched.add(node_id)
+                            break
+    
+    print(f"  [Stage 1c] Auto-matched {len(auto_matched)} entities: {list(auto_matched)}")
+
+    matched = list(auto_matched)
+    remaining_candidates = [n for n in candidate_list if n not in auto_matched]
+
+    if remaining_candidates:
+        nodes_str = ", ".join(f'"{n}"' for n in remaining_candidates)
+        linking_prompt = f"""You are an expert clinical entity linker. Identify which entities from the provided "Knowledge Graph entities" list are mentioned or clearly implied in the "Clinical scenario".
 
 Knowledge Graph entities (English):
 [{nodes_str}]
@@ -388,25 +412,23 @@ CRITICAL RULES:
 3. Return ONLY a valid JSON list containing the matched entity names EXACTLY as they appear in the list.
 4. STRICT MATCHING: If none of the candidate entities in the list are mentioned or clearly implied in the clinical scenario, you MUST return an empty list: []. Do not match unrelated entities.
 """
-    try:
-        raw_linking = call_llm_api(linking_prompt, response_format="text", model_size="8b")
-        bracket_match = re.search(r'\[.*?\]', raw_linking, re.DOTALL)
-        if bracket_match:
-            matched = json.loads(bracket_match.group())
-            # Double check that they actually exist in the candidate list
-            cand_lower = {c.lower(): c for c in candidate_list}
-            result = []
-            for m in matched:
-                if isinstance(m, str):
-                    canon = cand_lower.get(m.strip().lower())
-                    if canon:
-                        result.append(canon)
-            print(f"  [Stage 1c] Matched {len(result)} entities: {result}")
-            return result, extracted_terms
-    except Exception as e:
-        print("  ⚠️ Stage 1c linking error:", e)
+        try:
+            raw_linking = call_llm_api(linking_prompt, response_format="text", model_size="8b")
+            bracket_match = re.search(r'\[.*?\]', raw_linking, re.DOTALL)
+            if bracket_match:
+                llm_matched = json.loads(bracket_match.group())
+                # Double check that they actually exist in the remaining list
+                cand_lower = {c.lower(): c for c in remaining_candidates}
+                for m in llm_matched:
+                    if isinstance(m, str):
+                        canon = cand_lower.get(m.strip().lower())
+                        if canon and canon not in matched:
+                            matched.append(canon)
+        except Exception as e:
+            print("  ⚠️ Stage 1c LLM linking error:", e)
 
-    return [], extracted_terms
+    print(f"  [Stage 1c] Final matched entities: {matched}")
+    return matched, extracted_terms
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -453,7 +475,7 @@ def bfs_multi_hop_traversal(seed_nodes: list[str]) -> list[dict]:
 # STAGE 3 — Priority Scoring & Pruning
 # ─────────────────────────────────────────────────────────────────────────────
 
-def score_and_prune_triples(all_triples: list[dict], max_triples: int = 50) -> list[dict]:
+def score_and_prune_triples(all_triples: list[dict], max_triples: int = 25) -> list[dict]:
     """
     Score each triple by relation type priority weight (from RELATION_WEIGHTS).
     Triples from hop-1 get a +2 bonus. Triples from CONTRAINDICATED_WITH
@@ -802,8 +824,8 @@ def generate_medical_decision(clinical_text: str, patient_id: str) -> dict:
     )
 
     # ── Stage 3: Scoring & Context Building ─────────────────────────────────
-    pipeline_logs.append(f"[{ts} INFO] Stage 3: Scoring and pruning triples (max 50)...")
-    scored_triples = score_and_prune_triples(all_triples, max_triples=50)
+    pipeline_logs.append(f"[{ts} INFO] Stage 3: Scoring and pruning triples (max 25)...")
+    scored_triples = score_and_prune_triples(all_triples, max_triples=25)
     graph_context = build_rich_graph_context(scored_triples, matched_nodes)
     pipeline_logs.append(f"[{ts} INFO] Stage 3 complete: {len(scored_triples)} triples in context.")
 
