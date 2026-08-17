@@ -16,7 +16,10 @@ class TableTranslator:
     A specialized class to handle the translation of Markdown tables
     into flat, narrative clinical English sentences using the global APIKeyPool.
     """
-    def __init__(self, model_name: str = "meta-llama/llama-3.3-70b-instruct", temperature: float = 0.0):
+    def __init__(self, model_name: str = "vps/extract_graph", temperature: float = 0.0):
+        """Args:
+            model_name: LLM model identifier. Default 'vps/extract_graph' reads
+                VPS_API_KEY / VPS_API_BASE_URL / VPS_MODEL_NAME from .env."""
         logger.info("[TableTranslator] Initializing preprocessor LLM wrapper...")
         self.model_name = model_name
         self.temperature = temperature

@@ -102,9 +102,13 @@ class SentenceRewriter:
 
     def __init__(
         self,
-        model_name: str = "meta-llama/llama-3.3-70b-instruct",
+        model_name: str = "vps/extract_graph",
         temperature: float = 0.0,
     ):
+        """Args:
+            model_name: LLM model identifier. Default 'vps/extract_graph' reads
+                VPS_API_KEY / VPS_API_BASE_URL / VPS_MODEL_NAME from .env.
+                Other prefixes: xiaomi/, google/, openrouter/, groq/, openai/."""
         logger.info("[SentenceRewriter] Initializing preprocessor LLM wrapper...")
         self.model_name = model_name
         self.temperature = temperature

@@ -9,10 +9,23 @@ runs the multi-agent debate concurrently, filters out rejected triples, and gene
   - `canon_kg_debated.txt` (filtered triples list)
   - `result_at_each_stage_debated.json` (filtered detailed stage log)
   - `debate_log_all.json` (complete execution trace for audits)
+
+API Configuration:
+  The preferred way to configure the LLM endpoint is via .env file in edc-main/
+  (see .env.example). Variables: VPS_API_KEY, VPS_API_BASE_URL, VPS_MODEL_NAME.
+  Alternatively, pass --xiaomi_api_key on the command line.
 """
 
 import sys
 import os
+
+# Load .env from edc-main/ so VPS_*, OPENROUTER_API_KEY, etc. are available
+try:
+    from dotenv import load_dotenv
+    load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), "..", ".env"))
+except ImportError:
+    pass
+
 import csv
 import json
 import logging
@@ -198,8 +211,8 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--schema_path",
-        required=True,
-        help="Path to the target relation schema CSV file."
+        default="schemas/medical_relations.csv",
+        help="Path to the target relation schema CSV file (default: schemas/medical_relations.csv)."
     )
     parser.add_argument(
         "--output_dir",
@@ -210,8 +223,12 @@ if __name__ == "__main__":
     # Debate Gate hyperparameters
     parser.add_argument(
         "--debate_gate_model",
-        required=True,
-        help="LLM model identifier (e.g. 'openai/gpt-4o', 'google/gemini-2.5-pro')."
+        default="vps/extract_graph",
+        help=(
+            "LLM model identifier. Default: 'vps/extract_graph' which routes to your "
+            "VPS endpoint (VPS_API_KEY + VPS_API_BASE_URL + VPS_MODEL_NAME in .env). "
+            "Other prefixes: openai/, xiaomi/, google/, openrouter/, groq/."
+        )
     )
     parser.add_argument(
         "--clinical_specialist_model",

@@ -326,7 +326,7 @@ def parse_relation_definition(raw_definitions: str):
 def is_model_openai(model_name):
     """Returns True if the model should be called via an OpenAI-compatible API."""
     model_lower = model_name.lower()
-    prefixes = ["xiaomi/", "openrouter/", "google/", "gemini/", "openai/", "groq/"]
+    prefixes = ["vps/", "xiaomi/", "openrouter/", "google/", "gemini/", "openai/", "groq/"]
     if any(model_lower.startswith(p) for p in prefixes):
         return True
     if "gpt" in model_lower or "/" in model_lower:
@@ -590,16 +590,82 @@ def xiaomi_chat_completion(model, system_prompt, history, temperature=0, max_tok
     return content
 
 
+def vps_chat_completion(model, system_prompt, history, temperature=0, max_tokens=512):
+    """Call the user's private VPS LLM endpoint via OpenAI-compatible interface.
+
+    Configuration is read from environment variables (loaded from .env):
+
+    - ``VPS_API_KEY``        — API key for the VPS endpoint.
+    - ``VPS_API_BASE_URL``   — Base URL, e.g. ``http://103.56.160.46:20128/v1``.
+    - ``VPS_MODEL_NAME``     — Model name passed to the API (default: ``extract_graph``).
+
+    The ``model`` argument to this function is ignored; the real model name comes
+    from ``VPS_MODEL_NAME`` so callers can pass a human-readable label instead.
+    """
+    api_key = os.environ.get("VPS_API_KEY", "")
+    if not api_key:
+        raise ValueError(
+            "VPS_API_KEY environment variable is not set. "
+            "Please set VPS_API_KEY, VPS_API_BASE_URL, and VPS_MODEL_NAME in your .env file."
+        )
+
+    base_url = os.environ.get("VPS_API_BASE_URL", "").rstrip("/")
+    model_name = os.environ.get("VPS_MODEL_NAME", "extract_graph")
+
+    client = openai.OpenAI(
+        base_url=base_url,
+        api_key=api_key,
+        timeout=120.0,
+    )
+
+    messages = (
+        [{"role": "system", "content": system_prompt}] + history
+        if system_prompt
+        else history
+    )
+
+    response = None
+    while response is None:
+        try:
+            response = client.chat.completions.create(
+                model=model_name,
+                messages=messages,
+                temperature=temperature,
+                max_tokens=max_tokens,
+            )
+        except Exception as e:
+            logger.warning(f"[VPS API] Error: {e}. Retrying in 5s...")
+            time.sleep(5)
+
+    content = response.choices[0].message.content or ""
+    logger.debug(f"[VPS API] model={model_name} -> {content[:80]!r}")
+    return content
+
+
 def api_chat_completion(model, system_prompt, history, temperature=0, max_tokens=512):
-    """Unified entry point: dynamically routes based on model prefix and environment variables."""
+    """Unified entry point: dynamically routes based on model prefix and environment variables.
+
+    Priority order:
+    1. ``vps/`` prefix -> user's VPS endpoint (VPS_API_KEY + VPS_API_BASE_URL + VPS_MODEL_NAME)
+    2. ``xiaomi/`` prefix -> Xiaomi MiMo
+    3. ``gemini/`` / ``google/`` prefix -> Google Gemini
+    4. ``openrouter/`` prefix -> OpenRouter
+    5. ``openai/`` prefix -> OpenAI direct
+    6. ``groq/`` prefix -> Groq (OpenAI-compatible)
+    7. Environment-based fallbacks when no prefix given but env vars are set
+    """
     model_lower = model.lower()
-    
-    # 1. Xiaomi Prefix Routing
+
+    # 1. VPS Prefix Routing (highest priority — user's own endpoint)
+    if model_lower.startswith("vps/"):
+        return vps_chat_completion(model, system_prompt, history, temperature, max_tokens)
+
+    # 2. Xiaomi Prefix Routing
     if model_lower.startswith("xiaomi/"):
         actual_model = model[7:]
         return xiaomi_chat_completion(actual_model, system_prompt, history, temperature, max_tokens)
-        
-    # 2. Google Gemini Prefix Routing
+
+    # 3. Google Gemini Prefix Routing
     if model_lower.startswith("google/") or model_lower.startswith("gemini/"):
         if "gemini" not in model_lower or not os.environ.get("GEMINI_API_KEY"):
             return openrouter_chat_completion(model, system_prompt, history, temperature, max_tokens)
@@ -609,33 +675,36 @@ def api_chat_completion(model, system_prompt, history, temperature=0, max_tokens
         elif model_lower.startswith("gemini/"):
             actual_model = model[7:]
         return google_chat_completion(actual_model, system_prompt, history, temperature, max_tokens)
-        
-    # 3. OpenRouter Prefix Routing
+
+    # 4. OpenRouter Prefix Routing
     if model_lower.startswith("openrouter/"):
         actual_model = model[11:]
         return openrouter_chat_completion(actual_model, system_prompt, history, temperature, max_tokens)
-        
-    # 4. OpenAI Prefix Routing
+
+    # 5. OpenAI Prefix Routing
     if model_lower.startswith("openai/"):
         if not os.environ.get("OPENAI_KEY") and (os.environ.get("OPENROUTER_KEY") or os.environ.get("OPENROUTER_API_KEY")):
             return openrouter_chat_completion(model, system_prompt, history, temperature, max_tokens)
         actual_model = model[7:]
         return openai_chat_completion(actual_model, system_prompt, history, temperature, max_tokens)
-        
-    # 5. Groq Prefix Routing
+
+    # 6. Groq Prefix Routing
     if model_lower.startswith("groq/"):
         actual_model = model[5:]
         return openrouter_chat_completion(actual_model, system_prompt, history, temperature, max_tokens)
 
-    # --- Environment-based Key Fallbacks ---
+    # --- Environment-based Key Fallbacks (no prefix given) ---
+    # VPS fallback: if VPS_API_KEY is set, use the VPS endpoint
+    if os.environ.get("VPS_API_KEY", ""):
+        return vps_chat_completion(model, system_prompt, history, temperature, max_tokens)
+
     if os.environ.get("XIAOMI_API_KEY", "") and ("mimo" in model_lower or "xiaomi" in model_lower):
         return xiaomi_chat_completion(model, system_prompt, history, temperature, max_tokens)
-        
+
     elif os.environ.get("GEMINI_API_KEY", "") and "gemini" in model_lower:
         return google_chat_completion(model, system_prompt, history, temperature, max_tokens)
-        
+
     elif "/" in model or os.environ.get("GROQ_KEY", ""):
-        # Fallback to Xiaomi if OpenRouter/Groq keys are missing but Xiaomi key is present!
         if not os.environ.get("OPENROUTER_KEY", "") and not os.environ.get("GROQ_KEY", "") and os.environ.get("XIAOMI_API_KEY", ""):
             return xiaomi_chat_completion(model, system_prompt, history, temperature, max_tokens)
         return openrouter_chat_completion(model, system_prompt, history, temperature, max_tokens)
