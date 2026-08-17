@@ -77,30 +77,50 @@ class SchemaCanonicalizer:
         choices = ""
         candidate_relations = list(candidate_relation_definition_dict.keys())
         candidate_relation_descriptions = list(candidate_relation_definition_dict.values())
-        
+
         # Mapping to trace which relation and direction is chosen
         choice_mapping = {}
-        
+
+        # v2 (Week 2): cap at 26 letters; if we run out, return None instead of
+        # yielding non-alphabet characters ('[', '\\', etc).
+        MAX_LETTERS = 26
         letter_idx = 0
+
+        def _letter(i: int):
+            return chr(ord("A") + i)
+
         for idx, rel in enumerate(candidate_relations):
             # Option 1: Original direction
-            letter_orig = chr(ord("@") + letter_idx + 1)
+            if letter_idx >= MAX_LETTERS:
+                break
+            letter_orig = _letter(letter_idx)
             choice_letters_list.append(letter_orig)
             choice_mapping[letter_orig] = (rel, False)
             choices += f"{letter_orig}. '{rel}' (Original direction: Subject='{query_triplet[0]}', Object='{query_triplet[2]}')\n"
             choices += f"   Definition: {candidate_relation_descriptions[idx]}\n\n"
             letter_idx += 1
-            
+
             # Option 2: Swapped direction (if swapping Subject & Object makes it fit better)
-            letter_swap = chr(ord("@") + letter_idx + 1)
+            if letter_idx >= MAX_LETTERS:
+                break
+            letter_swap = _letter(letter_idx)
             choice_letters_list.append(letter_swap)
             choice_mapping[letter_swap] = (rel, True)
             choices += f"{letter_swap}. '{rel}' (Swapped direction: Subject='{query_triplet[2]}', Object='{query_triplet[0]}')\n"
             choices += f"   Definition: {candidate_relation_descriptions[idx]}\n\n"
             letter_idx += 1
-            
-        none_letter = chr(ord("@") + letter_idx + 1)
-        choices += f"{none_letter}. None of the above.\n"
+
+        if letter_idx >= MAX_LETTERS:
+            logger.warning(
+                "[SCHEMA_CANON] Cap reached (%d candidates without a None-option); "
+                "any unmatched candidate is rejected automatically.",
+                MAX_LETTERS,
+            )
+            none_letter = None
+        else:
+            none_letter = _letter(letter_idx)
+            choice_letters_list.append(none_letter)
+            choices += f"{none_letter}. None of the above.\n"
 
         verification_prompt = prompt_template_str.format_map(
             {

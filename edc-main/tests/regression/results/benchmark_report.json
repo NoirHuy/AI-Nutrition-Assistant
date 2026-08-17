@@ -1,0 +1,109 @@
+{
+  "timestamp": "2026-08-17T12:49:46.655838+00:00",
+  "label": "post_fix",
+  "headline": {
+    "files_run": 3,
+    "avg_length_reduction_pct": 29.72,
+    "total_author_leakage": 0,
+    "total_noise_leakage": 0,
+    "total_sentences": 9
+  },
+  "per_file": [
+    {
+      "file": "tests/regression/fixtures/biored_diabetes_sample.txt",
+      "metrics": {
+        "input_length": 594,
+        "output_length": 593,
+        "length_reduction_ratio": 0.0016835016835017313,
+        "sentence_count": 5,
+        "empty_paragraph_ratio": 0.0,
+        "author_metadata_leakage": {
+          "\\bBy[A-Z][a-z]+\\b": 0,
+          "\\bReviewed\\s+By[A-Z][a-z]+": 0,
+          "\\bByErika\\b": 0,
+          "\\bReviewed\\s+By[A-Z]\\.\\s*[A-Z]": 0
+        },
+        "noise_leakage": {
+          "^\\s*\\|\\s*$": 0,
+          "^\\s*View Patient Education": 0,
+          "^\\s*Multimedia\\s*$": 0,
+          "^\\s*Disclaimer\\s*$": 0,
+          "^\\s*follow us on": 0,
+          "^\\s*Copyright": 0
+        },
+        "real_content_present": {
+          "\\bdiabetes mellitus\\b": 4,
+          "\\binsulin\\b": 3,
+          "\\bglucose\\b": 1
+        },
+        "total_author_leakage_count": 0,
+        "total_noise_leakage_count": 0
+      },
+      "sample_leakage": []
+    },
+    {
+      "file": "tests/regression/fixtures/merck_cardiology_raw.txt",
+      "metrics": {
+        "input_length": 237,
+        "output_length": 145,
+        "length_reduction_ratio": 0.38818565400843885,
+        "sentence_count": 2,
+        "empty_paragraph_ratio": 0.0,
+        "author_metadata_leakage": {
+          "\\bBy[A-Z][a-z]+\\b": 0,
+          "\\bReviewed\\s+By[A-Z][a-z]+": 0,
+          "\\bByErika\\b": 0,
+          "\\bReviewed\\s+By[A-Z]\\.\\s*[A-Z]": 0
+        },
+        "noise_leakage": {
+          "^\\s*\\|\\s*$": 0,
+          "^\\s*View Patient Education": 0,
+          "^\\s*Multimedia\\s*$": 0,
+          "^\\s*Disclaimer\\s*$": 0,
+          "^\\s*follow us on": 0,
+          "^\\s*Copyright": 0
+        },
+        "real_content_present": {
+          "\\bdiabetes mellitus\\b": 0,
+          "\\binsulin\\b": 0,
+          "\\bglucose\\b": 0
+        },
+        "total_author_leakage_count": 0,
+        "total_noise_leakage_count": 0
+      },
+      "sample_leakage": []
+    },
+    {
+      "file": "tests/regression/fixtures/merck_diabetes_raw_by_other_author.txt",
+      "metrics": {
+        "input_length": 283,
+        "output_length": 141,
+        "length_reduction_ratio": 0.5017667844522968,
+        "sentence_count": 2,
+        "empty_paragraph_ratio": 0.0,
+        "author_metadata_leakage": {
+          "\\bBy[A-Z][a-z]+\\b": 0,
+          "\\bReviewed\\s+By[A-Z][a-z]+": 0,
+          "\\bByErika\\b": 0,
+          "\\bReviewed\\s+By[A-Z]\\.\\s*[A-Z]": 0
+        },
+        "noise_leakage": {
+          "^\\s*\\|\\s*$": 0,
+          "^\\s*View Patient Education": 0,
+          "^\\s*Multimedia\\s*$": 0,
+          "^\\s*Disclaimer\\s*$": 0,
+          "^\\s*follow us on": 0,
+          "^\\s*Copyright": 0
+        },
+        "real_content_present": {
+          "\\bdiabetes mellitus\\b": 1,
+          "\\binsulin\\b": 1,
+          "\\bglucose\\b": 0
+        },
+        "total_author_leakage_count": 0,
+        "total_noise_leakage_count": 0
+      },
+      "sample_leakage": []
+    }
+  ]
+}

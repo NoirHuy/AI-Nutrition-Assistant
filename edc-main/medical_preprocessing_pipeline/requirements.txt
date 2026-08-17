@@ -2,3 +2,8 @@ langchain>=0.1.0
 langchain-openai>=0.0.2
 langchain-text-splitters>=0.0.1
 python-dotenv>=1.0.0
+nltk==3.8.1
+# Bug #6 fix (2026-08-17): PyYAML is required by the new
+# config/{domain_rules,cardiology_rules}.yaml portability feature.
+# Without it, domain switching silently falls back to diabetes defaults.
+PyYAML>=6.0,<7.0

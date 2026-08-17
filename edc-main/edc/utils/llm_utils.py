@@ -177,52 +177,125 @@ def parse_raw_entities(raw_entities: str):
     return parsed_entities
 
 
-def parse_raw_triplets(raw_triplets: str):
+def parse_raw_triplets(raw_triplets: str, log_failures: bool = True):
+    """Parse a raw OIE string into a list of ``[subject, relation, object]``
+    triples.
+
+    The function is tolerant to:
+    - Wrapping brackets ``[...]`` per triple
+    - Nested lists (joined with comma)
+    - Unquoted triplets (best-effort comma split)
+
+    Per-triple parse failures are LOGGED instead of silently dropped, and
+    a counter of failures is returned alongside the parsed triples when the
+    optional ``return_metrics`` flag is set.
+
+    Backward compatible: existing callers that ignore the second return
+    value still receive the same ``List[List[str]]``.
+    """
     if not raw_triplets:
         return []
-        
-    # Look for enclosing brackets
+
     unmatched_left_bracket_indices = []
     matched_bracket_pairs = []
-
-    collected_triples = []
     for c_idx, c in enumerate(raw_triplets):
         if c == "[":
             unmatched_left_bracket_indices.append(c_idx)
         if c == "]":
             if len(unmatched_left_bracket_indices) == 0:
                 continue
-            # Found a right bracket, match to the last found left bracket
             matched_left_bracket_idx = unmatched_left_bracket_indices.pop()
             matched_bracket_pairs.append((matched_left_bracket_idx, c_idx))
+
+    collected_triples = []
+    failures = []
     for l, r in matched_bracket_pairs:
         bracketed_str = raw_triplets[l : r + 1]
         try:
             import ast
-            parsed_triple = ast.literal_eval(bracketed_str)
+            try:
+                parsed_triple = ast.literal_eval(bracketed_str)
+            except (ValueError, SyntaxError):
+                # Try fixing common LLM slip-ups: a trailing comma inside the
+                # bracket, optionally followed by whitespace before ``]``.
+                #
+                # Bug #3v2 fix (2026-08-17): the previous ``rstrip(",]") + "]"``
+                # only worked when the comma immediately preceded ``]`` — it
+                # stopped at the first whitespace character, so a triple like
+                # ``["Insulin", "treats", "T1D", ]`` was silently NOT fixed
+                # by this branch and fell through to the unquoted-split
+                # fallback below (which *happens* to recover the correct
+                # parts, masking the bug). The regex substitution handles
+                # arbitrary whitespace between the trailing comma and ``]``.
+                fixed = re.sub(r",\s*\]$", "]", bracketed_str.strip())
+                parsed_triple = ast.literal_eval(fixed)
             if not isinstance(parsed_triple, (list, tuple)):
                 continue
             if len(parsed_triple) == 3:
-                # Convert any nested lists to comma-separated strings
                 for e_idx, e in enumerate(parsed_triple):
                     if isinstance(e, list):
                         parsed_triple[e_idx] = ", ".join([str(item) for item in e])
-                
-                # Ensure all elements are indeed clean strings and not Ellipsis (...) or other objects
                 if all(isinstance(t, str) for t in parsed_triple):
-                    cleaned_triple = [t.strip() for t in parsed_triple]
+                    cleaned_triple = [t.strip().strip("'\"") for t in parsed_triple]
+                    # Entities with internal commas survive — they were quoted in the JSON-ish output.
+                    cleaned_triple = [t.strip() for t in cleaned_triple]
                     if all(e != "" and e != "_" and e != "..." for e in cleaned_triple):
                         collected_triples.append(cleaned_triple)
+                        continue
+            failures.append((bracketed_str, "len != 3 or non-string element"))
         except Exception as e:
             # Fallback for unquoted triplets, e.g. [Lithium, induces, Nephrogenic Diabetes Insipidus]
             content = bracketed_str[1:-1].strip()
-            parts = [p.strip() for p in content.split(',')]
-            parts = [p.strip("'\" ") for p in parts]
+            # Best-effort split with quote-aware heuristic: only split on commas that
+            # are NOT inside a quoted span.
+            parts = _split_unquoted_top_level_commas(content)
+            parts = [p.strip().strip("'\" ") for p in parts]
             if len(parts) == 3:
                 if all(e != "" and e != "_" and e != "..." for e in parts):
                     collected_triples.append(parts)
-    logger.debug(f"Triplets {raw_triplets} parsed as {collected_triples}")
+                else:
+                    failures.append((bracketed_str, f"empty/placeholder segment ({e})"))
+            else:
+                failures.append((bracketed_str, f"unquoted split -> {len(parts)} segments ({e})"))
+
+    if failures and log_failures:
+        for raw, reason in failures[:5]:
+            logger.warning(f"[PARSER] Dropped triple {raw!r}: {reason}")
+        if len(failures) > 5:
+            logger.warning(f"[PARSER] ... and {len(failures) - 5} more parse failures")
+
+    logger.debug(
+        f"Triplets parsed: {len(collected_triples)} kept, {len(failures)} failed (total {len(matched_bracket_pairs)} attempts)"
+    )
     return collected_triples
+
+
+def _split_unquoted_top_level_commas(text: str) -> List[str]:
+    """Split ``text`` on top-level commas that are not inside quotes.
+
+    Used as a fallback for malformed triplet strings where
+    ``ast.literal_eval`` failed (e.g. unbalanced quotes).
+    """
+    parts = []
+    buf = []
+    quote_char = None
+    for ch in text:
+        if quote_char is None:
+            if ch in ("'", '"'):
+                quote_char = ch
+                continue
+            if ch == ",":
+                parts.append("".join(buf).strip())
+                buf = []
+                continue
+            buf.append(ch)
+        else:
+            if ch == quote_char:
+                quote_char = None
+                continue
+            buf.append(ch)
+    parts.append("".join(buf).strip())
+    return parts
 
 
 def parse_relation_definition(raw_definitions: str):

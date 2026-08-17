@@ -21,7 +21,7 @@ import json
 import time
 import logging
 from argparse import ArgumentParser
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Optional
 from neo4j import GraphDatabase, Driver
 
 # Setup logging
@@ -66,13 +66,54 @@ class Neo4jUploader:
             self.driver.close()
             logger.info("Neo4j driver connection closed.")
 
-    def clear_database(self):
-        """Wipes all nodes and relationships in the active database."""
-        logger.warning(f"CLEAR DATABASE requested! Detaching and deleting all nodes in database: {self.database}")
-        query = "MATCH (n) DETACH DELETE n"
-        
+    def clear_database(self, only_labels: Optional[List[str]] = None):
+        """Wipes nodes (and relationships) in the active database.
+
+        Args:
+            only_labels: If provided, only nodes with at least one of these
+                labels will be deleted (partial reset). ``None`` deletes
+                everything (default).
+
+        v2 (Week 4 fix #7): the unique constraints are dropped BEFORE the
+        delete, so re-running the pipeline on an already-loaded database
+        is idempotent and does not fail on ``ConstraintValidationFailed``.
+        """
+        if only_labels:
+            logger.warning(
+                f"CLEAR DATABASE (PARTIAL) requested! Deleting nodes with labels "
+                f"{only_labels} in database: {self.database}"
+            )
+        else:
+            logger.warning(
+                f"CLEAR DATABASE requested! Detaching and deleting all nodes in database: {self.database}"
+            )
+
         start_time = time.monotonic()
         with self.driver.session(database=self.database) as session:
+            # 1) Drop unique constraints first so subsequent re-imports don't
+            # trip over stale nodes. We only drop constraints matching the
+            # known ``unique_<label>_id`` naming convention.
+            try:
+                existing = session.run(
+                    "SHOW CONSTRAINTS YIELD name WHERE name STARTS WITH 'unique_'"
+                )
+                names = [r["name"] for r in existing]
+                for nm in names:
+                    session.run(f"DROP CONSTRAINT {nm} IF EXISTS")
+                if names:
+                    logger.info(
+                        f"Dropped {len(names)} unique constraint(s) before reset: {names}"
+                    )
+            except Exception as e:
+                logger.debug(f"Constraint cleanup skipped or failed: {e}")
+
+            # 2) Now delete the data.
+            if only_labels:
+                where_clauses = " OR ".join([f"ANY(l IN labels(n) WHERE l = '{l}')" for l in only_labels])
+                query = f"MATCH (n) WHERE {where_clauses} DETACH DELETE n"
+            else:
+                query = "MATCH (n) DETACH DELETE n"
+
             result = session.run(query)
             summary = result.consume()
             nodes_deleted = summary.counters.nodes_deleted
@@ -83,14 +124,28 @@ class Neo4jUploader:
             )
 
     def create_constraints(self):
-        """Creates unique constraints and indexes to optimize matching performance."""
+        """Creates unique constraints and indexes to optimize matching performance.
+
+        v2 (Week 4 fix #7): the constraints are dropped first via
+        ``clear_database`` (or explicitly below) so this method is safe to
+        call on an already-loaded database.
+        """
         logger.info("Creating unique constraints and indexes on specific node labels...")
         labels_to_index = [
-            "Disease", "Symptom", "Drug", "Treatment_Procedure", "Dosage_Value", 
-            "Clinical_Metric", "Biomarker", "Nutrient", "Clinical_Rule", "Risk_Factor", 
+            "Disease", "Symptom", "Drug", "Treatment_Procedure", "Dosage_Value",
+            "Clinical_Metric", "Biomarker", "Nutrient", "Clinical_Rule", "Risk_Factor",
             "Anatomical_Site"
         ]
         with self.driver.session(database=self.database) as session:
+            # Belt-and-braces: drop the same named constraints here too,
+            # in case ``clear_database`` wasn't run before this method.
+            for label in labels_to_index:
+                drop_q = f"DROP CONSTRAINT unique_{label.lower()}_id IF EXISTS"
+                try:
+                    session.run(drop_q)
+                except Exception as e:
+                    logger.debug(f"Pre-drop of constraint unique_{label.lower()}_id skipped: {e}")
+
             for label in labels_to_index:
                 constraint_query = (
                     f"CREATE CONSTRAINT unique_{label.lower()}_id IF NOT EXISTS "

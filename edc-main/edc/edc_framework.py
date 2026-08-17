@@ -261,9 +261,21 @@ class EDC:
         self.umls_api_key = edc_configuration.get("umls_api_key", "")
         self.run_umls_normalization = edc_configuration.get("run_umls_normalization", False)
 
+        # v2 (Week 2): domain-aware validation rules (YAML).
+        self.domain_rules_path = edc_configuration.get("domain_rules_path", None)
+
+        # v2 (Week 2): checkpointing — partial output paths
+        self.checkpoint_dir = edc_configuration.get("checkpoint_dir", None)
+        self.checkpoint_every = int(edc_configuration.get("checkpoint_every", 50))  # items
+
         logging.basicConfig(level=edc_configuration["loglevel"])
 
         logger.info(f"Model used: {self.needed_model_set}")
+        if self.checkpoint_dir:
+            os.makedirs(self.checkpoint_dir, exist_ok=True)
+            logger.info(
+                f"[CHECKPOINTING] enabled — writing partial every {self.checkpoint_every} items to '{self.checkpoint_dir}'"
+            )
 
     def oie(
         self, input_text_list: List[str], previous_extracted_triplets_list: List[List[str]] = None, free_model=False
@@ -481,6 +493,13 @@ class EDC:
                 if idx < len(schema_definition_dict_list) and isinstance(schema_definition_dict_list[idx], dict):
                     schema_definition_dict_list[idx]["_entries"] = updated_entries
             logger.info("Entity-Type Canonicalization finished.")
+            self._maybe_write_checkpoint(
+                "after_canonicalization",
+                input_text_list,
+                oie_raw_list,
+                oie_triplets_list,
+                extra={"canon_triplets": non_null_triplets_list},
+            )
         else:
             logger.warning(f"[Phase 3b] sc_entity_type_template not found at '{et_template_path}', skipping entity type canonicalization.")
 
@@ -638,6 +657,39 @@ class EDC:
                     del self.loaded_model_dict[self.ee_llm_name]
         return entity_hint_list, relation_hint_list
 
+    def _maybe_write_checkpoint(
+        self,
+        stage_name: str,
+        input_text_list: List[str],
+        oie_raw_list: List[List[List[str]]],
+        oie_triplets_list: List[List[List[str]]],
+        extra: dict = None,
+    ) -> None:
+        """Write a partial-result checkpoint if checkpointing is enabled.
+
+        Skipped silently when ``checkpoint_dir`` was not provided to __init__.
+        """
+        if not self.checkpoint_dir:
+            return
+        try:
+            payload = {
+                "stage": stage_name,
+                "n_items": len(input_text_list),
+                "oie_raw": oie_raw_list,
+                "oie_validated": oie_triplets_list,
+                "input_previews": [t[:120] for t in input_text_list],
+            }
+            if extra:
+                payload.update(extra)
+            out_path = os.path.join(
+                self.checkpoint_dir, f"result_at_each_stage_partial__{stage_name}.json"
+            )
+            with open(out_path, "w", encoding="utf-8") as f:
+                json.dump(payload, f, indent=2, ensure_ascii=False)
+            logger.info("[CHECKPOINT] wrote %s (%d items)", out_path, len(input_text_list))
+        except Exception as exc:
+            logger.warning("[CHECKPOINT] Failed to write %s: %s", stage_name, exc)
+
     def extract_kg(
         self,
         input_text_list: List[str],
@@ -681,9 +733,11 @@ class EDC:
             embedder=sc_embedder,
             oie_few_shot_file_path=self.oie_few_shot_example_file_path,
             sd_few_shot_file_path=self._sd_few_shot_with_entities,
+            domain_rules_path=self.domain_rules_path,
         )
         oie_raw_list = [list(triples) for triples in oie_triplets_list]  # preserve original for logging
         oie_triplets_list = validator.validate_batch(oie_triplets_list, input_texts=input_text_list)
+        self._maybe_write_checkpoint("after_validation", input_text_list, oie_raw_list, oie_triplets_list)
 
         # ── Phase 2: Schema Definition ────────────────────────────────────
         del required_model_dict_current["sd"]

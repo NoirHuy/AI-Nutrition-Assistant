@@ -1,0 +1,94 @@
+# Domain-specific rules for the EDC pipeline's semantic validator.
+#
+# This file lets you port the pipeline to another medical domain (e.g.
+# cardiology, oncology) without changing Python source. Every entry under
+# the ``domain_specific_synonyms`` block is loaded into the validator's
+# synonym dictionary; ``non_entity_blacklist`` augments the in-code
+# `_NON_ENTITY_PATTERNS`; ``relation_type_constraints`` adds additional
+# fail-safes alongside the dynamic type constraints.
+#
+# Backward compatibility: if this file is missing, ``SemanticValidator``
+# falls back to the embedded defaults (diabetes-specific synonyms below).
+
+domain: diabetes
+
+# ─── Synonym mapping ─────────────────────────────────────────────────────────
+# Used by ``SemanticValidator.clean_and_simplify_entity``. Keys are matched
+# case-insensitively against the cleaned entity. Values are returned as the
+# canonical entity name.
+domain_specific_synonyms:
+  # Disease abbreviations
+  "nephrogenic diabetes insipidus": "NDI"
+  "type 2 diabetes": "T2DM"
+  "type 2 diabetes mellitus": "T2DM"
+  "gestational diabetes mellitus": "GDM"
+
+  # Protein / kinase name normalisation
+  "pkc-alpha": "PKCa"
+  "pkc alpha": "PKCa"
+  "pkca": "PKCa"
+  "pkc-alpha null": "PKCa"
+  "pkc-alpha ko": "PKCa"
+  "pkc alpha ko": "PKCa"
+  "pkc-alpha-deficient": "PKCa"
+  "pkc-alpha knockout": "PKCa"
+
+  # Transporter / channel abbreviations
+  "urea transporter-a1": "UT-A1"
+  "urea transporter ut-a1": "UT-A1"
+  "water channel aqp2": "AQP2"
+  "water channel protein aqp2": "AQP2"
+
+  # Lab values
+  "hs-crp": "CRP"
+
+# ─── Non-entity augmentation ─────────────────────────────────────────────────
+# Additional bare-word / pattern matches that should be discarded.
+# These are *added* to the built-in ``_NON_ENTITY_PATTERNS`` regexes; they
+# do not replace them.
+non_entity_blacklist:
+  bare_words:
+    - "mellitus"          # never an entity on its own
+    - "diabetes"          # ambiguous without modifier
+    - "insulin"
+  patterns:
+    - "^duration of \\d+$"
+    - "^postprandial$"
+
+# ─── Relation type constraints ───────────────────────────────────────────────
+# Extra fail-safes applied after dynamic type constraints. Format:
+#   relation_name: { allowed_subj_types: [...], blocked_obj_types: [...] }
+# These complement — but do not replace — the few-shot-derived constraints.
+relation_type_constraints:
+  "has adverse effect":
+    allowed_obj_types: [Symptom, Disease, Sign]
+    blocked_obj_types: [Drug, Treatment Procedure]
+  "has_adverse_effect":
+    allowed_obj_types: [Symptom, Disease, Sign]
+    blocked_obj_types: [Drug, Treatment Procedure]
+  "treated by":
+    allowed_subj_types: [Disease, Symptom]
+    blocked_subj_types: [Drug, Treatment Procedure]
+  "treated_by":
+    allowed_subj_types: [Disease, Symptom]
+    blocked_subj_types: [Drug, Treatment Procedure]
+  "may be treated by":
+    allowed_subj_types: [Disease, Symptom]
+    blocked_subj_types: [Drug, Treatment Procedure]
+
+# ─── Lexical anchor stopwords ────────────────────────────────────────────────
+# Words that should not be considered when checking if an entity is anchored
+# to the source text. Override only if the default list is wrong for your
+# domain; otherwise leave empty.
+lexical_anchor_stopwords: []
+
+# ─── Local medical abbreviations (loaded by post-processing) ────────────────
+# Used by ``post_processing.property_packer`` and ``umls_normalizer`` for
+# in-text abbreviation expansion.
+local_medical_abbreviations:
+  "T2DM": "Type 2 Diabetes Mellitus"
+  "T1DM": "Type 1 Diabetes Mellitus"
+  "GDM":  "Gestational Diabetes Mellitus"
+  "DKA":  "Diabetic Ketoacidosis"
+  "HHS":  "Hyperosmolar Hyperglycemic State"
+  "NDI":  "Nephrogenic Diabetes Insipidus"

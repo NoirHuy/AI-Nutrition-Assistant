@@ -1,0 +1,43 @@
+# Cardiology rules — an example demonstrating portability.
+# Switch the EDC pipeline to a cardiology KG by passing
+# ``--domain-rules config/cardiology_rules.yaml`` to ``edc_framework.py``.
+
+domain: cardiology
+
+domain_specific_synonyms:
+  "heart failure": "HF"
+  "congestive heart failure": "CHF"
+  "acute coronary syndrome": "ACS"
+  "myocardial infarction": "MI"
+  "st-elevation myocardial infarction": "STEMI"
+  "non-st-elevation myocardial infarction": "NSTEMI"
+  "atrial fibrillation": "AF"
+  "percutaneous coronary intervention": "PCI"
+  "coronary artery bypass graft": "CABG"
+
+non_entity_blacklist:
+  bare_words:
+    - "heart"
+    - "cardiac"
+  patterns: []
+
+relation_type_constraints:
+  "treated by":
+    allowed_subj_types: [Disease, Symptom]
+    blocked_subj_types: [Drug, Treatment Procedure]
+  "may be treated by":
+    allowed_subj_types: [Disease, Symptom]
+    blocked_subj_types: [Drug, Treatment Procedure]
+
+lexical_anchor_stopwords: []
+
+local_medical_abbreviations:
+  "HF":   "Heart Failure"
+  "CHF":  "Congestive Heart Failure"
+  "ACS":  "Acute Coronary Syndrome"
+  "MI":   "Myocardial Infarction"
+  "STEMI": "ST-Elevation Myocardial Infarction"
+  "NSTEMI": "Non-ST-Elevation Myocardial Infarction"
+  "AF":   "Atrial Fibrillation"
+  "PCI":  "Percutaneous Coronary Intervention"
+  "CABG": "Coronary Artery Bypass Graft"

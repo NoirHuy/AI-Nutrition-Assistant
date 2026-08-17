@@ -28,6 +28,7 @@ import os
 import re
 import time
 import json
+from collections import OrderedDict
 from dataclasses import dataclass, field, asdict
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple
@@ -298,6 +299,7 @@ You are continuing the debate about the following Knowledge Graph triple:
 3. If you disagree with their reasoning, explain WHY with specific evidence
 4. You may change your verdict if convinced by superior arguments
 5. Maintain intellectual honesty — do NOT simply agree to reach consensus
+6. Do NOT change your verdict unless you find a CONCRETE factual error in your own reasoning. Mere agreement is not evidence.
 
 Provide your updated analysis, then conclude with the required format on the LAST LINE."""
 
@@ -492,39 +494,60 @@ class AgentLLMDebateGate:
             valid_relations_str
         )
         
-        # Initialize the 3 agents with equal voting weights (unweighted consensus)
+        # Initialize the 3 agents with diverse temperatures (Week 3 fix #6).
+        # The previous code used a single ``temperature`` (0.3) plus a flat
+        # +0.1 bump for the Skeptic; that left Clinical_Specialist and
+        # Ontology_Inspector behaviourally identical, which is the classic
+        # recipe for groupthink.
         self.agents: List[AgentPersona] = [
             AgentPersona(
                 name="Clinical_Specialist",
                 weight=1.0,
                 system_prompt=_SYSTEM_PROMPT_CLINICAL_SPECIALIST,
-                temperature=temperature,
+                temperature=0.2,  # factual
                 model_name=clinical_specialist_model or model_name,
             ),
             AgentPersona(
                 name="Ontology_Inspector",
                 weight=1.0,
                 system_prompt=ontology_system_prompt,
-                temperature=temperature,
+                temperature=0.2,  # strict, deterministic
                 model_name=ontology_inspector_model or model_name,
             ),
             AgentPersona(
                 name="Medical_Skeptic",
                 weight=1.0,
                 system_prompt=_SYSTEM_PROMPT_MEDICAL_SKEPTIC,
-                temperature=temperature + 0.1,  # Slightly higher for creative skepticism
+                temperature=0.5,  # diverse, critic-friendly
                 model_name=medical_skeptic_model or model_name,
             ),
         ]
-        
+
+        # Per-triple cache (Week 3 fix). When the same (subject, relation,
+        # object) triple is verified twice, return the cached ``DebateResult``
+        # instead of burning more API calls. The cache key is stable per
+        # triple regardless of case/whitespace.
+        #
+        # Bug #4 fix (2026-08-17): the cache is now bounded — an ``OrderedDict``
+        # that drops the least-recently-used entry once ``max_cache_size``
+        # is exceeded. Without this, long-running extractions over tens of
+        # thousands of triples would accumulate DebateResult objects (each
+        # carrying transcripts for every round) and never release them.
+        max_cache_size: int = int(
+            os.environ.get("DEBATE_GATE_CACHE_SIZE", "10000")
+        )
+        self._cache_max_size = max_cache_size
+        self._cache: "OrderedDict[Tuple[str, str, str], DebateResult]" = OrderedDict()
         # Statistics counters
-        self._stats = {
+        self._stats: Dict[str, int] = {
             "total_verified": 0,
             "total_accepted": 0,
             "total_rejected": 0,
             "total_vetoed": 0,
             "total_api_calls": 0,
             "total_rounds": 0,
+            "cache_hits": 0,
+            "cache_misses": 0,
         }
         
         logger.info(
@@ -795,8 +818,27 @@ class AgentLLMDebateGate:
         """
         start_time = time.time()
         subject, relation, obj = triple
-        
+
         logger.info(f"[DebateGate] ═══ Verifying: ({subject}, {relation}, {obj}) ═══")
+
+        # Per-triple cache lookup. We store the *post-debate* DebateResult
+        # so a re-run doesn't need to make any LLM calls.
+        cache_key = (
+            subject.strip().lower(),
+            relation.strip().lower(),
+            obj.strip().lower(),
+        )
+        if cache_key in self._cache:
+            cached = self._cache[cache_key]
+            # LRU: mark as most recently used
+            self._cache.move_to_end(cache_key)
+            # Return a fresh copy tagged with cache hit so callers can audit.
+            self._stats["cache_hits"] += 1
+            logger.info(
+                f"[DebateGate] ⚡ Cache HIT for ({subject}, {relation}, {obj}); skipping {cached.rounds_completed} rounds / {len(cached.agent_responses)} responses"
+            )
+            return cached
+        self._stats["cache_misses"] += 1
         
         all_responses: List[AgentResponse] = []
         vetoed = False
@@ -880,6 +922,17 @@ class AgentLLMDebateGate:
             self._stats["total_rejected"] += 1
         if vetoed:
             self._stats["total_vetoed"] += 1
+
+        # Persist to per-triple cache. Bounded LRU: if adding this entry
+        # would exceed ``max_cache_size``, drop the least-recently-used
+        # entry first.
+        self._cache[cache_key] = result
+        if len(self._cache) > self._cache_max_size:
+            evicted_key, _ = self._cache.popitem(last=False)
+            logger.debug(
+                f"[DebateGate] Cache LRU eviction: {evicted_key} "
+                f"(size={len(self._cache)}/{self._cache_max_size})"
+            )
         
         # Log final decision
         status_icon = "✅ ACCEPTED" if accepted else "❌ REJECTED"
@@ -1063,6 +1116,23 @@ class AgentLLMDebateGate:
         """Reset all statistics counters."""
         for key in self._stats:
             self._stats[key] = 0
+
+    def clear_cache(self) -> None:
+        """Drop all cached ``DebateResult`` entries and reset hit/miss
+        counters. Useful for memory-bounded batch processing and tests.
+        """
+        cache_size = len(self._cache)
+        self._cache.clear()
+        self._stats["cache_hits"] = 0
+        self._stats["cache_misses"] = 0
+        logger.info(f"[DebateGate] Cache cleared: {cache_size} entries dropped")
+
+    def cache_info(self) -> Dict[str, int]:
+        """Return a dict describing current cache state (size + max)."""
+        return {
+            "size": len(self._cache),
+            "max_size": self._cache_max_size,
+        }
 
 
 # ─────────────────────────────────────────────────────────────────────────────

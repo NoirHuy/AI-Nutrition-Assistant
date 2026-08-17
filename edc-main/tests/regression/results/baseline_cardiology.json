@@ -1,0 +1,36 @@
+{
+  "timestamp": "2026-08-17T12:22:24.586664+00:00",
+  "input_file": "../tests/regression/fixtures/merck_cardiology_raw.txt",
+  "clean_prose_version": "baseline (pre-fix)",
+  "metrics": {
+    "input_length": 237,
+    "output_length": 186,
+    "length_reduction_ratio": 0.21518987341772156,
+    "sentence_count": 3,
+    "empty_paragraph_ratio": 0.0,
+    "author_metadata_leakage": {
+      "\\bBy[A-Z][a-z]+\\b": 1,
+      "\\bReviewed\\s+By[A-Z][a-z]+": 0,
+      "\\bByErika\\b": 0,
+      "\\bReviewed\\s+By[A-Z]\\.\\s*[A-Z]": 0
+    },
+    "noise_leakage": {
+      "^\\s*\\|\\s*$": 0,
+      "^\\s*View Patient Education": 0,
+      "^\\s*Multimedia\\s*$": 0,
+      "^\\s*Disclaimer\\s*$": 0,
+      "^\\s*follow us on": 0,
+      "^\\s*Copyright": 0
+    },
+    "real_content_present": {
+      "\\bdiabetes mellitus\\b": 0,
+      "\\binsulin\\b": 0,
+      "\\bglucose\\b": 0
+    },
+    "total_author_leakage_count": 1,
+    "total_noise_leakage_count": 0
+  },
+  "sample_leakage": [
+    "ByMaria L. Rodriguez, MD, Johns Hopkins"
+  ]
+}

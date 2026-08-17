@@ -10,7 +10,10 @@ Single source of truth for:
 Previously these were duplicated across umls_normalizer.py and property_packer.py.
 """
 
-from typing import Dict
+import os
+from pathlib import Path
+from typing import Dict, Optional
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Cache versioning — bump this when the cache schema changes
@@ -57,8 +60,42 @@ MEDICAL_SAFE_TUIS: frozenset = frozenset({
 # Medical Abbreviation Expansion Table
 # Maps common clinical abbreviations / aliases → canonical lowercase form.
 # Used in normalize_entity_for_dedup() and _expand_abbreviations().
+#
+# v2 (Week 4 fix #2 portability): the *full* abbreviation table is loaded
+# from ``config/domain_rules.yaml`` (under ``local_medical_abbreviations``)
+# when available — fall back to the table below when the YAML is missing.
+# The defaults here match the historical diabetes behaviour so existing
+# callers see no change.
 # ─────────────────────────────────────────────────────────────────────────────
-LOCAL_MEDICAL_ABBREVIATIONS: Dict[str, str] = {
+
+
+def _load_domain_abbreviations() -> Optional[Dict[str, str]]:
+    """Load abbreviation overrides from the active domain rules YAML.
+
+    Returns ``None`` when no YAML is found or PyYAML is missing.
+    """
+    try:
+        import yaml
+    except ImportError:
+        return None
+    candidates = [
+        Path(__file__).resolve().parent.parent / "config" / "domain_rules.yaml",
+        Path(__file__).resolve().parent.parent.parent / "config" / "domain_rules.yaml",
+    ]
+    for p in candidates:
+        if not p.exists():
+            continue
+        try:
+            data = yaml.safe_load(p.read_text(encoding="utf-8")) or {}
+        except Exception:
+            continue
+        if isinstance(data, dict) and data.get("local_medical_abbreviations"):
+            # YAML keys are uppercase canonical names; dedup uses lowercase
+            return {k.lower(): v.lower() for k, v in data["local_medical_abbreviations"].items()}
+    return None
+
+
+_LOCAL_DIABETES_RAW: Dict[str, str] = {
     # Diabetes diseases
     "t2dm": "type 2 diabetes mellitus",
     "t1dm": "type 1 diabetes mellitus",
@@ -90,22 +127,73 @@ LOCAL_MEDICAL_ABBREVIATIONS: Dict[str, str] = {
     "metformin hcl": "metformin",
     "glp-1": "glucagon-like peptide-1",
     "glp1": "glucagon-like peptide-1",
-    "dpp-4": "dipeptidyl peptidase-4",
-    "dpp4": "dipeptidyl peptidase-4",
-    "sglt-2": "sodium-glucose cotransporter-2",
-    "sglt2": "sodium-glucose cotransporter-2",
-    "ace inhibitor": "angiotensin converting enzyme inhibitor",
-    "ace-i": "angiotensin converting enzyme inhibitor",
+    "sglt2": "sglt2 inhibitor",
+    "sglt-2": "sglt2 inhibitor",
+    "dpp-4": "dpp-4 inhibitor",
+    "dpp4": "dpp-4 inhibitor",
+    "tzds": "thiazolidinedione",
+    "tld": "thiazolidinedione",
+    "su": "sulphonylurea",
+    "sua": "sulphonylurea",
+    "sulfonylurea": "sulphonylurea",
+    "insulin nph": "nph insulin",
+    "nph": "nph insulin",
+    "mdii": "multiple daily injections",
+    "csii": "continuous subcutaneous insulin infusion",
+    "ace-i": "ace inhibitor",
     "arb": "angiotensin receptor blocker",
-    # Anatomy / conditions
-    "cns": "central nervous system",
-    "cvd": "cardiovascular disease",
-    "ckd": "chronic kidney disease",
-    "esrd": "end stage renal disease",
-    # Procedures
-    "cabg": "coronary artery bypass grafting",
-    "pci": "percutaneous coronary intervention",
+    "ccb": "calcium channel blocker",
+    "statin": "statin",
+    "asa": "aspirin",
 }
+
+
+# Note: dict literal above is `_LOCAL_DIABETES_RAW`; ``LOCAL_MEDICAL_ABBREVIATIONS``
+# below is the public-facing mapping that also folds in YAML overrides.
+
+
+def get_local_medical_abbreviations() -> Dict[str, str]:
+    """Return the abbreviation table, augmented by the active domain YAML.
+
+    Loaded lazily so test runs without the YAML file don't pay the import
+    cost of PyYAML.
+    """
+    overrides = _load_domain_abbreviations()
+    if overrides is None:
+        return dict(_LOCAL_DIABETES_RAW)
+    # YAML is the source of truth for portability; diabetes defaults are
+    # merged underneath so any abbreviation not in the YAML still resolves.
+    return {**dict(_LOCAL_DIABETES_RAW), **overrides}
+
+
+# Bug #5 fix (2026-08-17): callers used to read the frozen
+# ``LOCAL_MEDICAL_ABBREVIATIONS`` dict that was captured at import time.
+# That meant switching the active YAML at runtime had no effect on code
+# that had already cached the reference. The recommended pattern now is:
+#   from post_processing.constants import get_local_medical_abbreviations
+#   abbrev = get_local_medical_abbreviations()      # always fresh
+#
+# The ``LOCAL_MEDICAL_ABBREVIATIONS`` symbol is preserved for backward
+# compatibility — it now points at a *mutable* dict that is rebroadcast
+# whenever ``refresh_local_medical_abbreviations()`` is called, so any
+# caller using ``.get`` / iteration sees the latest values without
+# re-importing.
+LOCAL_MEDICAL_ABBREVIATIONS: Dict[str, str] = get_local_medical_abbreviations()
+
+
+def refresh_local_medical_abbreviations() -> Dict[str, str]:
+    """Reload the YAML-driven abbreviation table in place.
+
+    Returns the *same* dict that ``LOCAL_MEDICAL_ABBREVIATIONS`` points
+    to so callers can either grab it directly or rely on the module-level
+    name.
+
+    Use this when a long-running process switches domains at runtime.
+    """
+    fresh = get_local_medical_abbreviations()
+    LOCAL_MEDICAL_ABBREVIATIONS.clear()
+    LOCAL_MEDICAL_ABBREVIATIONS.update(fresh)
+    return LOCAL_MEDICAL_ABBREVIATIONS
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Medical stopwords — removed before canonical comparison to reduce false negatives

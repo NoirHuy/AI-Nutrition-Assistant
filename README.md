@@ -389,6 +389,78 @@ So sánh đối chiếu chất lượng trích xuất giữa hệ thống trích
 
 ---
 
+## 🔁 Reproducibility — Regression Tests & Benchmark Report
+
+Phần này mô tả cách chạy bộ **regression test tự động** cho pipeline 4-phase và cách đọc **benchmark report so sánh trước/sau**. Bộ test này là kết quả của chương trình 1 tháng sửa 7 vấn đề cốt lõi và cải thiện tính portability cho các domain ngoài `diabetes`.
+
+### 1. Chạy toàn bộ regression test
+
+```powershell
+cd edc-main
+python -m pytest tests/regression -v
+```
+
+Tất cả test chạy **offline** (không gọi API thật) nhờ `conftest.py` tự động inject API key giả và các fixture patch LLM.
+
+| Test file | Phase | Mục đích |
+|---|---|---|
+| `test_phase1_preprocessing.py` | 1 | Clean prose + NLTK sentence split + markdown table detection |
+| `test_phase3_debate.py` | 3 | Cache per-triple, diversified temperatures, anti-conformity prompt |
+| `test_full_pipeline.py` | End-to-end | Domain YAML portability, parser tolerance, regression vs baseline |
+
+### 2. Sinh benchmark report (so sánh trước/sau)
+
+```powershell
+# 1. Capture pre-fix baseline (chạy 1 lần trước khi sửa code)
+python tests/regression/baseline_preprocessor.py \
+    --input tests/regression/fixtures/biored_diabetes_sample.txt \
+    --output tests/regression/results/baseline_pre_fix.json
+
+# 2. Capture post-fix metric cho 3 file reference
+python tests/regression/benchmark_report.py \
+    --output-dir tests/regression/results \
+    --label post_fix \
+    --files tests/regression/fixtures/biored_diabetes_sample.txt \
+            tests/regression/fixtures/merck_cardiology_raw.txt \
+            tests/regression/fixtures/merck_diabetes_raw_by_other_author.txt
+```
+
+Kết quả:
+- `tests/regression/results/benchmark_report.json` — machine-readable metrics
+- `tests/regression/results/benchmark_report.md` — bảng báo cáo cho stakeholder
+
+### 3. Đọc benchmark report
+
+Bảng `Headline Metrics` hiển thị:
+- **Avg length reduction**: % ký tự bị cắt bởi clean_prose (giảm = nhiều noise đã lọc).
+- **Total author leakage / noise leakage**: số pattern web noise còn sót (mục tiêu = `0`).
+- **Total sentences**: số câu NLTK tách được (dùng cho regression detection).
+
+Bảng `Pre-fix vs Post-fix` so sánh trực tiếp với baseline_pre_fix.json — nếu Δ dương là đã cải thiện.
+
+### 4. Portability sang domain mới (ví dụ: cardiology)
+
+Toàn bộ rule đặc thù đã được tách ra ngoài YAML. Để chuyển sang domain mới:
+
+```yaml
+# edc-main/config/cardiology_rules.yaml
+domain: cardiology
+domain_specific_synonyms:
+  "heart failure": "HF"
+  "myocardial infarction": "MI"
+non_entity_blacklist:
+  bare_words: ["heart", "failure", "myocardial"]
+```
+
+```python
+from edc.semantic_validator import SemanticValidator
+v = SemanticValidator(domain_rules_path="config/cardiology_rules.yaml")
+```
+
+Validation `clean_and_simplify_entity("heart failure") == "HF"` ngay mà không cần sửa code.
+
+---
+
 ## 📚 Tài liệu tham khảo chính
 
 
