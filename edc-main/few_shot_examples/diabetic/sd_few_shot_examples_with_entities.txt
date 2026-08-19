@@ -1,199 +1,118 @@
-Example 1:
-Text: Metformin is the first-line pharmacological treatment recommended for type 2 diabetes mellitus and helps lower HbA1c levels.
-Triples: [['type 2 diabetes mellitus', 'may be treated by', 'Metformin'], ['type 2 diabetes mellitus', 'has evaluation', 'HbA1c']]
+Example 1 (Chẩn đoán & Chỉ số lâm sàng):
+Text: Đái tháo đường type 2 được chẩn đoán khi xét nghiệm đường huyết đói đạt mức >= 126 mg/dL.
+Triples: [['Đái tháo đường type 2', 'được chẩn đoán bằng', 'xét nghiệm đường huyết đói'], ['xét nghiệm đường huyết đói', 'có ngưỡng chẩn đoán', '>= 126 mg/dL']]
 Answer:
 [
   {
-    "subject": "type 2 diabetes mellitus",
-    "subject_type": "Disease",
-    "subject_type_definition": "A chronic metabolic disorder characterized by elevated blood glucose levels due to insulin resistance or insufficient insulin production.",
-    "relation": "may be treated by",
-    "relation_definition": "The subject disease or condition may be alleviated or managed through the use of the specified drug, procedure, or intervention.",
-    "object": "Metformin",
-    "object_type": "Drug",
-    "object_type_definition": "A pharmacological agent prescribed to prevent, treat, or manage a disease or clinical condition."
+    "subject": "Đái tháo đường type 2",
+    "subject_type": "Bệnh",
+    "subject_type_definition": "Bệnh lý rối loạn chuyển hóa mạn tính đặc trưng bởi tình trạng tăng đường huyết do đề kháng insulin hoặc thiếu hụt insulin.",
+    "relation": "được chẩn đoán bằng",
+    "relation_definition": "Bệnh lý được phát hiện hoặc chẩn đoán thông qua xét nghiệm hoặc kỹ thuật thăm dò chức năng tương ứng.",
+    "object": "xét nghiệm đường huyết đói",
+    "object_type": "Xét nghiệm / Thăm dò",
+    "object_type_definition": "Xét nghiệm máu hoặc kỹ thuật cận lâm sàng dùng để định lượng nồng độ glucose trong máu sau khi nhịn ăn."
   },
   {
-    "subject": "type 2 diabetes mellitus",
-    "subject_type": "Disease",
-    "subject_type_definition": "A chronic metabolic disorder characterized by elevated blood glucose levels due to insulin resistance or insufficient insulin production.",
-    "relation": "has evaluation",
-    "relation_definition": "The subject disease or patient state is assessed or monitored using the specified clinical test, measurement, or metric.",
-    "object": "HbA1c",
-    "object_type": "Clinical Metric",
-    "object_type_definition": "A quantifiable laboratory or clinical measurement used to assess disease status, treatment response, or health outcomes."
+    "subject": "xét nghiệm đường huyết đói",
+    "subject_type": "Xét nghiệm / Thăm dò",
+    "subject_type_definition": "Xét nghiệm máu hoặc kỹ thuật cận lâm sàng dùng để định lượng nồng độ glucose trong máu sau khi nhịn ăn.",
+    "relation": "có ngưỡng chẩn đoán",
+    "relation_definition": "Phương pháp xét nghiệm gắn liền với một tiêu chuẩn hoặc ngưỡng giá trị định lượng để xác định bệnh.",
+    "object": ">= 126 mg/dL",
+    "object_type": "Chỉ số lâm sàng",
+    "object_type_definition": "Ngưỡng định lượng hoặc khoảng giá trị đo lường lâm sàng dùng làm tiêu chuẩn chẩn đoán."
   }
 ]
 
-Example 2:
-Text: Diabetic neuropathy and diabetic retinopathy are serious microvascular complications of diabetes mellitus.
-Triples: [['diabetic neuropathy', 'manifestation of', 'diabetes mellitus'], ['diabetic retinopathy', 'manifestation of', 'diabetes mellitus']]
+Example 2 (Điều trị & Liều dùng):
+Text: Bệnh tăng huyết áp được điều trị bằng Amlodipine với liều dùng khởi đầu 5mg/ngày.
+Triples: [['tăng huyết áp', 'được điều trị bằng', 'Amlodipine'], ['Amlodipine', 'có liều dùng', '5mg/ngày']]
 Answer:
 [
   {
-    "subject": "diabetic neuropathy",
-    "subject_type": "Disease",
-    "subject_type_definition": "A pathological condition or complication that arises as a direct result of an underlying primary disease.",
-    "relation": "manifestation of",
-    "relation_definition": "The subject represents a direct clinical presentation, complication, or symptom that occurs as a consequence of the object disease.",
-    "object": "diabetes mellitus",
-    "object_type": "Disease",
-    "object_type_definition": "A chronic metabolic disorder characterized by elevated blood glucose levels due to insulin resistance or insufficient insulin production."
+    "subject": "tăng huyết áp",
+    "subject_type": "Bệnh",
+    "subject_type_definition": "Tình trạng bệnh lý tim mạch mạn tính khi áp lực dòng máu lên thành động mạch tăng cao kéo dài.",
+    "relation": "được điều trị bằng",
+    "relation_definition": "Bệnh lý được kiểm soát hoặc chữa trị thông qua việc sử dụng thuốc hoặc nhóm dược lý chỉ định.",
+    "object": "Amlodipine",
+    "object_type": "Thuốc / Nhóm thuốc",
+    "object_type_definition": "Thuốc hạ áp nhóm chẹn kênh canxi dihydropyridine tác dụng kéo dài."
   },
   {
-    "subject": "diabetic retinopathy",
-    "subject_type": "Disease",
-    "subject_type_definition": "A pathological condition or complication that arises as a direct result of an underlying primary disease.",
-    "relation": "manifestation of",
-    "relation_definition": "The subject represents a direct clinical presentation, complication, or symptom that occurs as a consequence of the object disease.",
-    "object": "diabetes mellitus",
-    "object_type": "Disease",
-    "object_type_definition": "A chronic metabolic disorder characterized by elevated blood glucose levels due to insulin resistance or insufficient insulin production."
+    "subject": "Amlodipine",
+    "subject_type": "Thuốc / Nhóm thuốc",
+    "subject_type_definition": "Thuốc hạ áp nhóm chẹn kênh canxi dihydropyridine tác dụng kéo dài.",
+    "relation": "có liều dùng",
+    "relation_definition": "Thuốc đi kèm quy định về mức liều, hàm lượng hoặc cách dùng cụ thể cho bệnh nhân.",
+    "object": "5mg/ngày",
+    "object_type": "Liều dùng",
+    "object_type_definition": "Định lượng liều thuốc, tần suất và cách dùng cụ thể cho người bệnh."
   }
 ]
 
-Example 3:
-Text: SGLT2 inhibitors are contraindicated in patients with severe chronic kidney disease due to reduced renal function.
-Triples: [['chronic kidney disease', 'has contraindicated drug', 'SGLT2 inhibitors']]
+Example 3 (Mục tiêu kiểm soát & Chống chỉ định):
+Text: Điều trị đái tháo đường nhằm duy trì HbA1c < 7.0%, nhưng chống chỉ định dùng Metformin ở bệnh nhân suy thận nặng.
+Triples: [['đái tháo đường', 'đạt mục tiêu kiểm soát', 'HbA1c < 7.0%'], ['Metformin', 'chống chỉ định ở', 'suy thận nặng']]
 Answer:
 [
   {
-    "subject": "chronic kidney disease",
-    "subject_type": "Disease",
-    "subject_type_definition": "A long-term condition in which the kidneys gradually lose their ability to filter waste from the blood.",
-    "relation": "has contraindicated drug",
-    "relation_definition": "The subject disease or condition is associated with a drug that is medically forbidden due to the risk of serious adverse effects.",
-    "object": "SGLT2 inhibitors",
-    "object_type": "Drug",
-    "object_type_definition": "A pharmacological agent prescribed to prevent, treat, or manage a disease or clinical condition."
+    "subject": "đái tháo đường",
+    "subject_type": "Bệnh",
+    "subject_type_definition": "Bệnh lý rối loạn chuyển hóa mạn tính đặc trưng bởi tình trạng tăng glucose máu.",
+    "relation": "đạt mục tiêu kiểm soát",
+    "relation_definition": "Quá trình quản lý và điều trị bệnh hướng tới việc đạt được ngưỡng chỉ số lâm sàng an toàn.",
+    "object": "HbA1c < 7.0%",
+    "object_type": "Mục tiêu kiểm soát",
+    "object_type_definition": "Ngưỡng chỉ số lâm sàng hoặc mục tiêu sinh lý cần đạt được để phòng ngừa biến chứng."
+  },
+  {
+    "subject": "Metformin",
+    "subject_type": "Thuốc / Nhóm thuốc",
+    "subject_type_definition": "Thuốc hạ đường huyết nhóm biguanide dùng đường uống điều trị đái tháo đường.",
+    "relation": "chống chỉ định ở",
+    "relation_definition": "Thuốc không được phép sử dụng ở đối tượng bệnh nhân có tình trạng bệnh lý này do nguy cơ gây biến cố bất lợi.",
+    "object": "suy thận nặng",
+    "object_type": "Bệnh",
+    "object_type_definition": "Tình trạng suy giảm chức năng lọc của thận mức độ nặng gây tích lũy độc chất."
   }
 ]
 
-Example 4:
-Text: Analog insulins, including detemir, glargine, or degludec, are preferred over human insulins, such as NPH, to reduce hypoglycemia in patients with diabetes.
-Triples: [['diabetes', 'may be treated by', 'detemir'], ['detemir', 'is preferred over', 'NPH'], ['NPH', 'has adverse effect', 'hypoglycemia']]
+Example 4 (Yếu tố nguy cơ, Thang điểm đánh giá & Biến chứng):
+Text: Hút thuốc lá là yếu tố nguy cơ hàng đầu của COPD, bệnh được đánh giá mức độ nặng bằng thang điểm CAT và có thể dẫn đến biến chứng tâm phế mạn.
+Triples: [['COPD', 'có yếu tố nguy cơ là', 'hút thuốc lá'], ['COPD', 'được đánh giá bằng', 'thang điểm CAT'], ['COPD', 'dẫn đến biến chứng', 'tâm phế mạn']]
 Answer:
 [
   {
-    "subject": "diabetes",
-    "subject_type": "Disease",
-    "subject_type_definition": "A chronic metabolic disorder characterized by elevated blood glucose levels due to insulin resistance or insufficient insulin production.",
-    "relation": "may be treated by",
-    "relation_definition": "The subject disease or condition may be alleviated or managed through the use of the specified drug, procedure, or intervention.",
-    "object": "detemir",
-    "object_type": "Drug",
-    "object_type_definition": "A pharmacological agent prescribed to prevent, treat, or manage a disease or clinical condition."
+    "subject": "COPD",
+    "subject_type": "Bệnh",
+    "subject_type_definition": "Bệnh phổi tắc nghẽn mạn tính đặc trưng bởi tình trạng giới hạn luồng thông khí tiến triển không hồi phục hoàn toàn.",
+    "relation": "có yếu tố nguy cơ là",
+    "relation_definition": "Bệnh lý chịu tác động thúc đẩy khởi phát bởi thói quen, môi trường hoặc yếu tố sinh học này.",
+    "object": "hút thuốc lá",
+    "object_type": "Yếu tố nguy cơ",
+    "object_type_definition": "Hành vi tiêu dùng thuốc lá chứa nhiều chất độc hại gây viêm mạn tính phế quản và phế nang."
   },
   {
-    "subject": "detemir",
-    "subject_type": "Drug",
-    "subject_type_definition": "A pharmacological agent prescribed to prevent, treat, or manage a disease or clinical condition.",
-    "relation": "is preferred over",
-    "relation_definition": "The subject drug or treatment is clinically preferred or recommended over the object drug due to superior efficacy, safety, or reduced adverse effects.",
-    "object": "NPH",
-    "object_type": "Drug",
-    "object_type_definition": "A pharmacological agent prescribed to prevent, treat, or manage a disease or clinical condition."
+    "subject": "COPD",
+    "subject_type": "Bệnh",
+    "subject_type_definition": "Bệnh phổi tắc nghẽn mạn tính đặc trưng bởi tình trạng tắc nghẽn đường thở mạn tính.",
+    "relation": "được đánh giá bằng",
+    "relation_definition": "Bệnh lý sử dụng thang điểm hoặc bảng kiểm chuẩn hóa để lượng giá mức độ ảnh hưởng và tiên lượng.",
+    "object": "thang điểm CAT",
+    "object_type": "Thang điểm đánh giá",
+    "object_type_definition": "Bảng câu hỏi kiểm tra đánh giá mức độ ảnh hưởng của COPD đối với cuộc sống người bệnh."
   },
   {
-    "subject": "NPH",
-    "subject_type": "Drug",
-    "subject_type_definition": "A pharmacological agent prescribed to prevent, treat, or manage a disease or clinical condition.",
-    "relation": "has adverse effect",
-    "relation_definition": "The subject drug or treatment may cause or increase the risk of the object adverse event, side effect, or complication.",
-    "object": "hypoglycemia",
-    "object_type": "Symptom",
-    "object_type_definition": "A clinical sign or physiological finding that indicates the presence or severity of a disease or condition."
-  }
-]
-
-Example 5:
-Text: The basal insulin dose can be increased by 20% if the fasting blood glucose is >180 mg/dL.
-Triples: [['basal insulin', 'has dose adjustment', 'increase by 20%'], ['fasting blood glucose', 'has clinical threshold', '>180 mg/dL']]
-Answer:
-[
-  {
-    "subject": "basal insulin",
-    "subject_type": "Drug",
-    "subject_type_definition": "A pharmacological agent prescribed to prevent, treat, or manage a disease or clinical condition.",
-    "relation": "has dose adjustment",
-    "relation_definition": "The subject drug or treatment has a specific dosage modification rule or titration protocol tied to the object value.",
-    "object": "increase by 20%",
-    "object_type": "Dosage Value",
-    "object_type_definition": "A quantitative measurement of drug dosage, titration percentage, or clinical threshold level expressed with units."
-  },
-  {
-    "subject": "fasting blood glucose",
-    "subject_type": "Clinical Metric",
-    "subject_type_definition": "A quantifiable laboratory or clinical measurement used to assess disease status, treatment response, or health outcomes.",
-    "relation": "has clinical threshold",
-    "relation_definition": "The subject clinical metric has a specific quantitative threshold that triggers a clinical action or defines a clinical state.",
-    "object": ">180 mg/dL",
-    "object_type": "Dosage Value",
-    "object_type_definition": "A quantitative measurement of drug dosage, titration percentage, or clinical threshold level expressed with units."
-  }
-]
-
-Example 6:
-Text: After basal insulin is initiated, discontinuation of Sulfonylureas (SUs) is recommended for patients with diabetes.
-Triples: [['diabetes', 'may be treated by', 'basal insulin'], ['sulfonylureas', 'should be discontinued with', 'basal insulin']]
-Answer:
-[
-  {
-    "subject": "diabetes",
-    "subject_type": "Disease",
-    "subject_type_definition": "A chronic metabolic disorder characterized by elevated blood glucose levels due to insulin resistance or insufficient insulin production.",
-    "relation": "may be treated by",
-    "relation_definition": "The subject disease or condition may be alleviated or managed through the use of the specified drug, procedure, or intervention.",
-    "object": "basal insulin",
-    "object_type": "Drug",
-    "object_type_definition": "A pharmacological agent prescribed to prevent, treat, or manage a disease or clinical condition."
-  },
-  {
-    "subject": "sulfonylureas",
-    "subject_type": "Drug",
-    "subject_type_definition": "A pharmacological agent prescribed to prevent, treat, or manage a disease or clinical condition.",
-    "relation": "should be discontinued with",
-    "relation_definition": "The subject drug should be stopped or discontinued when the object drug or treatment is initiated.",
-    "object": "basal insulin",
-    "object_type": "Drug",
-    "object_type_definition": "A pharmacological agent prescribed to prevent, treat, or manage a disease or clinical condition."
-  }
-]
-
-Example 7:
-Text: Excess weight results in insulin resistance and increases the risk for prediabetes and Type 2 Diabetes.
-Triples: [['excess weight', 'increases risk of', 'prediabetes'], ['excess weight', 'increases risk of', 'Type 2 Diabetes'], ['insulin resistance', 'may be finding of disease', 'excess weight']]
-Answer:
-[
-  {
-    "subject": "excess weight",
-    "subject_type": "Disease",
-    "subject_type_definition": "An abnormal or excessive accumulation of body fat that presents a risk to health, classified as a chronic disease.",
-    "relation": "increases risk of",
-    "relation_definition": "The subject entity is a known risk factor that elevates the probability of developing the object disease or condition.",
-    "object": "prediabetes",
-    "object_type": "Disease",
-    "object_type_definition": "A condition in which blood sugar levels are higher than normal but not yet high enough to be classified as type 2 diabetes."
-  },
-  {
-    "subject": "excess weight",
-    "subject_type": "Disease",
-    "subject_type_definition": "An abnormal or excessive accumulation of body fat that presents a risk to health, classified as a chronic disease.",
-    "relation": "increases risk of",
-    "relation_definition": "The subject entity is a known risk factor that elevates the probability of developing the object disease or condition.",
-    "object": "Type 2 Diabetes",
-    "object_type": "Disease",
-    "object_type_definition": "A chronic metabolic disorder characterized by elevated blood glucose levels due to insulin resistance or insufficient insulin production."
-  },
-  {
-    "subject": "insulin resistance",
-    "subject_type": "Symptom",
-    "subject_type_definition": "A clinical sign or physiological state in which body cells do not respond effectively to insulin, often associated with metabolic disease.",
-    "relation": "may be finding of disease",
-    "relation_definition": "The subject clinical finding or symptom may be present in or associated with patients who have the object disease.",
-    "object": "excess weight",
-    "object_type": "Disease",
-    "object_type_definition": "An abnormal or excessive accumulation of body fat that presents a risk to health, classified as a chronic disease."
+    "subject": "COPD",
+    "subject_type": "Bệnh",
+    "subject_type_definition": "Bệnh phổi tắc nghẽn mạn tính.",
+    "relation": "dẫn đến biến chứng",
+    "relation_definition": "Bệnh tiến triển mạn tính dẫn đến tổn thương cấu trúc hoặc suy giảm chức năng cơ quan khác.",
+    "object": "tâm phế mạn",
+    "object_type": "Biến chứng",
+    "object_type_definition": "Tình trạng phì đại và suy tim phải thứ phát sau bệnh lý mạn tính ở phổi."
   }
 ]
 

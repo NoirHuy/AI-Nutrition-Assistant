@@ -1,15 +1,19 @@
 Your task is to extract clinical knowledge as a semantic graph from biomedical/clinical text. Output a list of triples in the format: [Entity1, Relationship, Entity2].
 
 ════════════════════════════════════════════════
-PART 1: ALLOWED ENTITY TYPES
+PART 1: ALLOWED CLINICAL ENTITY TYPES
 ════════════════════════════════════════════════
-Entities MUST ONLY belong to one of these UMLS-aligned types:
-  - [Disease/Condition]        e.g., Hypertension, Infection, Diabetes, Arthritis, Asthma, Cancer
-  - [Treatment/Medication]     e.g., Aspirin, Penicillin, Lifestyle Modification, Chemotherapy, Surgery
-  - [Symptom/Clinical Finding] e.g., Pain, Fever, High Blood Pressure, Cough, Inflammation, Dyspnea
-  - [Clinical Metric/Lab Test] e.g., Blood Pressure, Temperature, HbA1c, eGFR, Heart Rate, Lab value
-  - [Anatomical Site]          e.g., Heart, Lung, Kidney, Brain, Pancreas, Retina
-  - [Dosage Value]             e.g., 500mg, 10ml, once daily, 5 units, 20% dosage reduction
+Entities MUST belong to one of these 10 target clinical categories:
+  - [Bệnh / Disease]                   e.g., Tăng huyết áp, Đái tháo đường, Hen phế quản, COPD, Suy tim, Đột quỵ
+  - [Triệu chứng / Symptom]            e.g., Khó thở, Khò khè, Ho khạc đờm, Khát nhiều, Đau thắt ngực, Phù
+  - [Xét nghiệm / Thăm dò]             e.g., Đo huyết áp, Xét nghiệm HbA1c, Đo hô hấp ký FEV1, Đường huyết đói, ECG
+  - [Chỉ số lâm sàng / Metric]         e.g., >= 140/90 mmHg, HbA1c >= 6.5%, FEV1/FVC < 0.70, Đường huyết đói >= 126 mg/dL
+  - [Thuốc / Nhóm thuốc / Drug]        e.g., Metformin, Amlodipine, Salbutamol, Budesonide, LAMA, LABA, ACEi, ARB
+  - [Liều dùng / Dosage]               e.g., 500mg ngày 2 lần, 5mg/ngày, xịt 2 nhát khi khó thở, tiêm dưới da
+  - [Mục tiêu kiểm soát / Target]      e.g., HbA1c < 7.0%, Huyết áp < 130/80 mmHg, Đường huyết đói 80-130 mg/dL
+  - [Yếu tố nguy cơ / Risk Factor]     e.g., Hút thuốc lá, Béo phì, Ăn mặn, Dị nguyên, Ô nhiễm không khí, Ít vận động
+  - [Thang điểm đánh giá / Risk Scale] e.g., Thang điểm SCORE2, Bảng điểm FINDRISC, Bảng kiểm ACT, Thang điểm CAT / mMRC / BODE
+  - [Biến chứng / Complication]        e.g., Đột quỵ não, Nhồi máu cơ tim, Bệnh võng mạc, Suy thận mạn, Suy hô hấp cấp
 
 ════════════════════════════════════════════════
 PART 2: STRICT IGNORE LIST — DO NOT EXTRACT

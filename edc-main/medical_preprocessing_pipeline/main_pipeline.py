@@ -5,12 +5,19 @@ main_pipeline.py — Unified medical text pre-processing pipeline.
                    Clean web scraping artifacts, parse tables, resolve pronouns, and segment.
 """
 
+import sys
 import os
 import json
 import re
 import logging
 from typing import List, Dict, Any
+from pathlib import Path
 from dotenv import load_dotenv
+
+# Ensure local directory is in sys.path for direct module imports
+script_dir = os.path.dirname(os.path.abspath(__file__))
+if script_dir not in sys.path:
+    sys.path.insert(0, script_dir)
 
 # LangChain splitters for Markdown
 from langchain_text_splitters import MarkdownHeaderTextSplitter
@@ -28,13 +35,16 @@ logging.basicConfig(
 logger = logging.getLogger("MedicalPreprocessingPipeline")
 
 def load_environment():
-    """Load environment variables from local and root .env files."""
-    # Try loading root .env
-    load_dotenv(dotenv_path="../.env")
-    # Try loading current folder .env
-    load_dotenv()
-    if not os.getenv("OPENROUTER_API_KEY"):
-        raise ValueError("OPENROUTER_API_KEY environment variable is not configured in the environment or .env file.")
+    """Load environment variables from local and parent .env files."""
+    # Search candidates: current dir, edc-main, root project
+    candidates = [
+        os.path.join(script_dir, ".env"),
+        os.path.join(script_dir, "..", ".env"),
+        os.path.join(script_dir, "..", "..", ".env"),
+    ]
+    for env_path in candidates:
+        if os.path.exists(env_path):
+            load_dotenv(dotenv_path=env_path)
 
 def detect_table(content: str) -> bool:
     """Detect if markdown content contains a table separator line (|---|)."""

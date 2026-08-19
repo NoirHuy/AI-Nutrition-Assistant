@@ -1,62 +1,28 @@
-Example 1 (Raw extraction using text-based verbs and phrases):
-Text: Metformin is the first-line pharmacological treatment recommended for type 2 diabetes mellitus and helps lower HbA1c levels.
-Triplets: [['Metformin', 'is the first-line pharmacological treatment recommended for', 'type 2 diabetes mellitus'], ['Metformin', 'helps lower', 'HbA1c levels']]
+Example 1 (Chẩn đoán & Xét nghiệm - Đái tháo đường):
+Text: Đái tháo đường type 2 được chẩn đoán khi xét nghiệm đường huyết đói đạt mức >= 126 mg/dL hoặc HbA1c >= 6.5%.
+Triplets: [['Đái tháo đường type 2', 'được chẩn đoán bằng', 'xét nghiệm đường huyết đói'], ['xét nghiệm đường huyết đói', 'có ngưỡng chẩn đoán', '>= 126 mg/dL'], ['Đái tháo đường type 2', 'được chẩn đoán bằng', 'xét nghiệm HbA1c'], ['xét nghiệm HbA1c', 'có ngưỡng chẩn đoán', '>= 6.5%']]
 
-Example 2 (Pure text-anchored OIE relation):
-Text: SGLT2 inhibitors are contraindicated in patients with severe chronic kidney disease due to reduced renal function.
-Triplets: [['SGLT2 inhibitors', 'are contraindicated in', 'patients with severe chronic kidney disease']]
+Example 2 (Điều trị & Liều dùng - Tăng huyết áp):
+Text: Amlodipine là thuốc chẹn kênh canxi được chỉ định điều trị tăng huyết áp với liều khởi đầu 5mg uống 1 lần mỗi ngày.
+Triplets: [['tăng huyết áp', 'được điều trị bằng', 'Amlodipine'], ['Amlodipine', 'có liều dùng', '5mg uống 1 lần mỗi ngày']]
 
-Example 3 (Metadata Exclusion - Author and Committee titles are ignored):
-Text: Susan L. Samson, MD, PhD, FACE is the Chair of the Task Force for the American Association of Clinical Endocrinology.
+Example 3 (Mục tiêu kiểm soát & Chống chỉ định - Hen phế quản):
+Text: Điều trị hen phế quản nhằm đạt mục tiêu kiểm soát hoàn toàn triệu chứng, đồng thời chống chỉ định dùng thuốc chẹn beta không chọn lọc ở bệnh nhân hen.
+Triplets: [['hen phế quản', 'đạt mục tiêu kiểm soát', 'kiểm soát hoàn toàn triệu chứng'], ['thuốc chẹn beta không chọn lọc', 'chống chỉ định ở', 'hen phế quản']]
+
+Example 4 (Yếu tố nguy cơ & Thang điểm đánh giá - COPD):
+Text: Hút thuốc lá là yếu tố nguy cơ hàng đầu gây COPD, và mức độ khó thở ở bệnh nhân COPD được đánh giá bằng thang điểm mMRC hoặc thang điểm CAT.
+Triplets: [['COPD', 'có yếu tố nguy cơ là', 'hút thuốc lá'], ['COPD', 'được đánh giá bằng', 'thang điểm mMRC'], ['COPD', 'được đánh giá bằng', 'thang điểm CAT']]
+
+Example 5 (Biến chứng & Dự báo nguy cơ - Tăng huyết áp & Đái tháo đường):
+Text: Tăng huyết áp không được kiểm soát có thể dẫn đến biến chứng đột quỵ não và nhồi máu cơ tim, được phân tầng nguy cơ tim mạch qua thang điểm SCORE2.
+Triplets: [['tăng huyết áp', 'dẫn đến biến chứng', 'đột quỵ não'], ['tăng huyết áp', 'dẫn đến biến chứng', 'nhồi máu cơ tim'], ['tăng huyết áp', 'được đánh giá nguy cơ bằng', 'thang điểm SCORE2']]
+
+Example 6 (Metadata Exclusion - Loại bỏ thông tin xuất bản, tác giả, bệnh viện):
+Text: PGS.TS Nguyễn Văn A, Bệnh viện Bạch Mai, chủ biên Hướng dẫn chẩn đoán và điều trị năm 2025 theo chuẩn Bộ Y tế.
 Triplets: []
-Explanation: This sentence contains only academic titles, professional roles, and administrative organizations. It does not contain any clinical facts, disease treatments, or clinical guidelines.
+Explanation: Câu này chỉ chứa thông tin chức danh, tên tác giả, tên bệnh viện và năm phát hành tài liệu, không chứa dữ kiện tri thức y khoa lâm sàng nên trả về mảng rỗng [].
 
-Example 4 (Raw text-based triple extraction):
-Text: Lifestyle modification including dietary changes and physical activity is recommended for the management of prediabetes and type 2 diabetes mellitus.
-Triplets: [['lifestyle modification', 'is recommended for the management of', 'prediabetes'], ['lifestyle modification', 'is recommended for the management of', 'type 2 diabetes mellitus']]
-
-Example 5 (Complications mapping with text-based verbs):
-Text: Diabetic neuropathy and diabetic retinopathy are serious microvascular complications of diabetes mellitus.
-Triplets: [['Diabetic neuropathy', 'are serious microvascular complications of', 'diabetes mellitus'], ['diabetic retinopathy', 'are serious microvascular complications of', 'diabetes mellitus']]
-
-Example 6 (Metadata Exclusion - Publisher, Journal, and Year are ignored):
-Text: All rights reserved. Published in the Journal of Clinical Practice, May 2025. Copyright © 2025 by American Diabetes Association.
-Triplets: []
-Explanation: This text contains only publisher rights, publication years, dates, copyright notices, and journal names. It is purely administrative metadata and does not contain clinical Triples.
-
-Example 7 (Extraction using text-anchored verbs):
-Text: Analog insulins, including detemir, glargine, or degludec, are preferred over human insulins, such as neutral protamine Hagedorn (NPH), to reduce hypoglycemia in patients with diabetes.
-Triplets: [['analog insulins', 'are preferred over', 'human insulins'], ['analog insulins', 'reduce', 'hypoglycemia in patients with diabetes']]
-
-Example 8 (Dose titration using text-anchored phrases):
-Text: The basal insulin dose can be increased by 20% if the fasting blood glucose is >180 mg/dL.
-Triplets: [['basal insulin dose', 'can be increased by', '20%'], ['fasting blood glucose', 'is', '>180 mg/dL']]
-
-Example 9 (Metadata Exclusion - University and Academic Institution names are ignored):
-Text: Harvard Medical School and the Department of Endocrinology, Boston, MA, USA, contributed to this writing panel.
-Triplets: []
-Explanation: This sentence only mentions university names, academic departments, and writing panel locations, which is administrative metadata and irrelevant to medical fact extraction.
-
-Example 10 (Clinical threshold using text-anchored verbs):
-Text: Basal insulin should be titrated every 2 to 3 days to reach glycemic targets with a goal fasting blood glucose of <110 mg/dL.
-Triplets: [['Basal insulin', 'should be titrated every', '2 to 3 days'], ['fasting blood glucose', 'has a goal of', '<110 mg/dL']]
-
-Example 11 (Causal Direction):
-Text: Type 1 diabetes mellitus occurs because the immune system destroys the pancreatic beta-cells, causing them to stop producing adequate insulin.
-Triplets: [['destruction of pancreatic beta-cells', 'causes', 'type 1 diabetes mellitus'], ['type 1 diabetes mellitus', 'is associated with', 'inadequate insulin production']]
-Explanation: The beta-cell destruction is the underlying cause, and type 1 diabetes is the effect. Therefore, the causal arrow must flow from the cause to the effect. Never extract this in reverse as "type 1 diabetes mellitus cause of destruction of pancreatic beta-cells".
-
-Example 12 (Atomicity):
-Text: Patients with untreated type 1 diabetes mellitus will develop ketoacidosis without insulin.
-Triplets: [['type 1 diabetes mellitus', 'increases risk of', 'ketoacidosis']]
-Explanation: The object node must be kept atomic and short, e.g., 'ketoacidosis'. Never append conditional clauses like 'without insulin' to the node name itself; any conditional qualifiers must be left out of the node name.
-
-Example 13 (Pronoun Resolution):
-Text: Patients with type 1 diabetes mellitus require insulin; without it they develop ketoacidosis.
-Triplets: [['type 1 diabetes mellitus', 'requires', 'insulin'], ['type 1 diabetes mellitus', 'increases risk of', 'ketoacidosis']]
-Explanation: Never use vague pronouns like 'it' or 'they' as subjects or objects in your triplets. Always resolve them to their active clinical entities (e.g., 'it' is resolved to 'insulin', and 'they' is resolved to 'type 1 diabetes mellitus').
-
-Example 14 (Therapeutic Regimen / Subclass Relation):
-Text: Insulin replacement in type 1 diabetes should ideally mimic beta-cell function to provide basal and prandial requirements (physiologic replacement or basal-bolus dosing).
-Triplets: [['basal-bolus dosing', 'is a', 'insulin replacement'], ['insulin replacement', 'should ideally mimic', 'beta-cell function']]
-Explanation: Specific dosing regimens or strategies like 'basal-bolus dosing' are subclasses of broader treatment modalities like 'insulin replacement'. This must be represented using the 'is a' hierarchical relationship.
+Example 7 (Triệu chứng & Thăm dò chức năng - Hen phế quản):
+Text: Bệnh nhân hen phế quản thường có triệu chứng khò khè, khó thở về đêm và được xác định bằng đo hô hấp ký với chỉ số FEV1 tăng sau nghiệm pháp phục hồi phế quản.
+Triplets: [['hen phế quản', 'có triệu chứng', 'khò khè'], ['hen phế quản', 'có triệu chứng', 'khó thở về đêm'], ['hen phế quản', 'được chẩn đoán bằng', 'đo hô hấp ký']]

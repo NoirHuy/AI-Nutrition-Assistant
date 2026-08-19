@@ -222,8 +222,9 @@ class SentenceRewriter:
             max_tokens=512,
         )
         cleaned = result.strip()
-        # Remove any leading list marker or markdown quote
-        cleaned = re.sub(r"^[-*•\d+\.\s]+", "", cleaned)
+        # Remove any leading Resolved Sentence prefix, list marker or markdown quote
+        cleaned = re.sub(r"^(?:Resolved\s*(?:Sentence|Sentences)?\s*[:\-]\s*)+", "", cleaned, flags=re.IGNORECASE).strip()
+        cleaned = re.sub(r"^[-*•\d+\.\s]+", "", cleaned).strip()
         return cleaned or None
 
     def _legacy_rewrite(self, chunk_content: str, section_headers: str) -> List[str]:

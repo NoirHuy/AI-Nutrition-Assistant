@@ -496,9 +496,9 @@ class EDC:
             self._maybe_write_checkpoint(
                 "after_canonicalization",
                 input_text_list,
-                oie_raw_list,
                 oie_triplets_list,
-                extra={"canon_triplets": non_null_triplets_list},
+                oie_triplets_list,
+                extra={"canon_triplets": canonicalized_triplets_list},
             )
         else:
             logger.warning(f"[Phase 3b] sc_entity_type_template not found at '{et_template_path}', skipping entity type canonicalization.")

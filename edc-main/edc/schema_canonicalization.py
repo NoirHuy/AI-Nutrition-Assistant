@@ -3,7 +3,6 @@ import os
 from pathlib import Path
 import edc.utils.llm_utils as llm_utils
 import re
-from edc.utils.e5_mistral_utils import MistralForSequenceEmbedding
 from transformers import AutoModelForCausalLM, AutoTokenizer
 import numpy as np
 import copy
@@ -169,7 +168,7 @@ class SchemaCanonicalizer:
                         selected_letter = char.upper()
                         break
 
-        if selected_letter is not None:
+        if selected_letter is not None and selected_letter in choice_mapping:
             chosen_rel, should_swap = choice_mapping[selected_letter]
             if should_swap:
                 canonicalized_triplet[0] = query_triplet[2]

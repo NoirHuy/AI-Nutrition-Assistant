@@ -1,19 +1,26 @@
 # Bỏ qua thư viện nặng
 node_modules/
 .venv/
+venv/
 __pycache__/
 *.pyc
+.pytest_cache/
 
 # Bỏ qua biến môi trường & Key bí mật
 .env
+**/.env
+.env.*
 
-# Bỏ qua dữ liệu Database (Nặng & Thay đổi liên tục)
+# Bỏ qua dữ liệu Database & outputs tạm
 neo4j_data/
+edc-main/output/
+**/output/
 
 # Bỏ qua file build
 dist/
 build/
 
-# Bỏ qua file hệ thống
+# Bỏ qua file hệ thống & log
 .DS_Store
 Thumbs.db
+*.log

@@ -9,7 +9,7 @@ if __name__ == "__main__":
     parser = ArgumentParser()
     # OIE module setting
     parser.add_argument(
-        "--oie_llm", default="mistralai/Mistral-7B-Instruct-v0.2", help="LLM used for open information extraction."
+        "--oie_llm", default="vps/extract_graph", help="LLM used for open information extraction."
     )
     parser.add_argument(
         "--oie_prompt_template_file_path",
@@ -18,33 +18,33 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--oie_few_shot_example_file_path",
-        default="./few_shot_examples/example/oie_few_shot_examples.txt",
+        default="./few_shot_examples/diabetic/oie_few_shot_examples.txt",
         help="Few shot examples used for open information extraction.",
     )
 
     # Schema Definition setting
     parser.add_argument(
-        "--sd_llm", default="mistralai/Mistral-7B-Instruct-v0.2", help="LLM used for schema definition."
+        "--sd_llm", default="vps/extract_graph", help="LLM used for schema definition."
     )
     parser.add_argument(
         "--sd_prompt_template_file_path",
-        default="./prompt_templates/example/sd_template.txt",
+        default="./prompt_templates/diabetic/sd_template_with_entities.txt",
         help="Prompt template used for schema definition.",
     )
     parser.add_argument(
         "--sd_few_shot_example_file_path",
-        default="./few_shot_examples/example/sd_few_shot_examples.txt",
+        default="./few_shot_examples/diabetic/sd_few_shot_examples_with_entities.txt",
         help="Few shot examples used for schema definition.",
     )
 
     # Schema Canonicalization setting
     parser.add_argument(
         "--sc_llm",
-        default="mistralai/Mistral-7B-Instruct-v0.2",
+        default="vps/extract_graph",
         help="LLM used for schema canonicaliztion verification.",
     )
     parser.add_argument(
-        "--sc_embedder", default="intfloat/e5-mistral-7b-instruct", help="Embedder used for schema canonicalization. Has to be a sentence transformer. Please refer to https://sbert.net/"
+        "--sc_embedder", default="openai/text-embedding-3-large", help="Embedder used for schema canonicalization. Has to be a sentence transformer or API embedder."
     )
     parser.add_argument(
         "--sc_prompt_template_file_path",
@@ -57,17 +57,17 @@ if __name__ == "__main__":
     # Input setting
     parser.add_argument(
         "--input_text_file_path",
-        default="./datasets/example.txt",
+        default="./data/raw_vietnamese/test_cleaned.txt",
         help="File containing input texts to extract KG from, each line contains one piece of text.",
     )
     parser.add_argument(
         "--target_schema_path",
-        default="./schemas/example_schema.csv",
+        default="./schemas/clinical_vietnamese_schema.csv",
         help="File containing the target relation schema to align to.",
     )
     parser.add_argument(
         "--target_entity_type_schema_path",
-        default="./schemas/disease/diabetes_entity_type_schema.csv",
+        default="./schemas/clinical_vietnamese_entity_type_schema.csv",
         help="File containing the target entity type schema to align to.",
     )
     # traditional EDC single-pass run
